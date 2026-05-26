@@ -1,17 +1,14 @@
 ---
-
+import MainLayout from '../layout/MainLayout.astro';
+import Header from '../components/Header.astro'
+import TestSection from '../components/TestSection.astro'
+import TestSection2 from '../components/TestSection2.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<MainLayout title="Carol | Fotografia" description="Fotografia com olhar sensível e acolhedor.">
+  <Header />
+<main>
+    <TestSection />
+    <TestSection2 />
+</main>
+</MainLayout>

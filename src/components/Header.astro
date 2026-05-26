@@ -1,0 +1,281 @@
+---
+// src/components/Header.astro
+---
+
+<header class="header" id="main-header">
+  <div class="header__glass"></div>
+  <div class="header__scaler">
+  <div class="header__container">
+    
+    <div class="header__left">
+      <button class="header__menu-btn" aria-label="Abrir menu">
+        <span class="menu-btn__icon">
+          <i class="line"></i>
+          <i class="line"></i>
+        </span>
+        <span class="menu-btn__text">MENU</span>
+      </button>
+      <a href="#PACOTES" class="header__link">PACOTES</a>
+    </div>
+
+<div class="header__center">
+  <a href="/" class="header__logo" aria-label="Carolina Alves Fotografia">
+    <span class="header__logo-text">Carolina</span>
+    <img src="/favicon.svg" alt="" class="logo__icon" />
+  </a>
+</div>
+
+    <div class="header__right">
+      <a href="#contact" class="header__link">SOLICITAR ORÇAMENTO</a>
+      <button class="header__favorite-btn" aria-label="Favoritos">
+        <svg class="favorite__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+  </div>
+</header>
+
+<style>
+  /* Variáveis baseadas na paleta da imagem */
+  :root {
+    --header-text-color: black; /* Tom creme/bege do texto */
+    --header-font-sans: 'Inter', system-ui, sans-serif;
+    --header-font-serif: 'Playfair Display', serif;
+  }
+
+  /* RESET DE BOTÕES BÁSICO */
+  button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+  }
+
+  /* ESTRUTURA PRINCIPAL */
+  .header {
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding-top: 2rem;
+    padding-right: 3rem;
+    padding-bottom: 1.5rem;
+    padding-left: 3rem;
+    color: var(--header-text-color);
+  }
+  
+  .header__glass {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  transform: scaleY(0);
+  transform-origin: top;
+  z-index: -1; /* fica atrás do conteúdo */
+  pointer-events: none;
+}
+
+.header__scaler {
+  transform-origin: top;      /* ancora a compressão no topo */
+  width: 100%;
+  /* a altura é definida pelo conteúdo interno */
+}
+
+.header__left,
+.header__center,
+.header__right {
+  will-change: transform;
+}
+
+  .header__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: relative; /* Define o limite do absolute da logo */
+  }
+
+  /* BLOCOS LATERAIS */
+  .header__left,
+  .header__right {
+    display: flex;
+    align-items: center;
+    gap: 3rem; /* Espaço entre os itens (ex: Menu e Residences) */
+  }
+
+  /* BLOCO CENTRAL (Centro Matemático) */
+  .header__center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header__logo-text {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  clip-path: inset(0 0 0 0); /* inicialmente totalmente visível */
+}
+
+  
+  
+  /* TIPOGRAFIA E ELEMENTOS */
+  .header__link {
+    font-family: var(--header-font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--header-text-color);
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+
+  .header__link:hover {
+    opacity: 1;
+  }
+
+  /* BOTÃO MENU HAMBÚRGUER */
+  .header__menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--header-font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .menu-btn__icon {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 24px;
+  }
+
+  .menu-btn__icon .line {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background-color: var(--header-text-color);
+    transition: transform 0.3s ease;
+  }
+  
+  /* A linha de baixo no modelo é levemente mais curta */
+  .menu-btn__icon .line:nth-child(2) {
+    width: 70%; 
+  }
+
+ .header__logo {
+    font-family: var(--header-font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--header-text-color);
+    text-decoration: none;
+    position: relative; /* OBRIGATÓRIO: Define as fronteiras para o ícone flutuar */
+    display: inline-block; /* O centro da tela será cravado no centro exato da palavra */
+  }
+.logo__icon {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    
+    /* POSIÇÃO INICIAL: O QUADRADO AZUL */
+    top: -15px;         /* Puxa para cima da linha do teto da palavra */
+    left: 100%;         /* Trava a borda esquerda do ícone na borda direita da palavra */
+    margin-left: -5px;  /* Ajuste fino empurrando levemente para a esquerda */
+    z-index: 2;
+  }
+
+  /* BOTÃO FAVORITO (Coração) */
+  .header__favorite-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+
+  .header__favorite-btn:hover {
+    opacity: 1;
+  }
+
+  .favorite__icon {
+    width: 20px;
+    height: 20px;
+  }
+</style>
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('.header') as HTMLElement;
+    const glass = document.querySelector('.header__glass') as HTMLElement;
+    const logoText = document.querySelector('.header__logo-text') as HTMLElement;
+    const logoIcon = document.querySelector('.logo__icon') as HTMLElement;
+
+    if (header && glass && logoText && logoIcon) {
+      
+      const textWidth = logoText.offsetWidth;
+      
+      const moveX = -(textWidth / 2 + 2);
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: document.body,
+          start: 'top -100', 
+          toggleActions: 'play none none reverse',
+        },
+        defaults: {
+          duration: 0.9,       
+          ease: 'expo.out' 
+        }
+      });
+
+      tl.to(glass, {
+        scaleY: 1,
+      }, 0);
+
+      tl.to(header, {
+        paddingTop: 30,
+        paddingRight: 70,
+        paddingBottom: 30,
+        paddingLeft: 70,
+      }, 0);
+      
+      tl.to(logoText, {
+        clipPath: `inset(0 ${textWidth}px 0 0)`, 
+      }, 0);
+      
+      gsap.set(logoIcon, { scale: 30 / 50 });
+      
+      // O Ícone assume o centro e cresce via placa de vídeo (GPU)
+ tl.to(logoIcon, {
+        scale: 1,           // Volta para os 50px reais
+        top: "50%",         // Crava no eixo Y central
+        left: "50%",        // Crava no eixo X central
+        xPercent: -50,      // Ajuste matemático de âncora (translate)
+        yPercent: -50,      // Ajuste matemático de âncora (translate)
+        marginLeft: 0       // Anula a margem de ajuste fino que usamos no CSS
+      }, 0);
+      
+    }
+  });
+</script>

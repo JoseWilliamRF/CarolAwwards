@@ -1,0 +1,44 @@
+<section class="test-section">
+  <div class="test-section__content">
+    <h2>Role para baixo</h2>
+    <p>Esta seção serve apenas para testar o scroll e o efeito do header.</p>
+  </div>
+</section>
+
+<style>
+  .test-section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(222, 206, 206);
+    color: #1a1a1a;
+    font-family: 'Playfair Display', serif;
+    text-align: center;
+  }
+
+  .test-section__content h2 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .test-section__content p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+</style>
+
+<script>
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  ScrollTrigger.create({
+    trigger: '.test-section',
+    start: 'top top',
+    end: 'bottom top',
+    snap: {
+      snapTo: 0.5,        // ponto médio da seção
+      duration: 0.5,
+      delay: 0,
+      ease: 'power2.inOut',
+    },
+  });
+</script>
