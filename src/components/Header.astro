@@ -1,279 +1,486 @@
----
-// src/components/Header.astro
----
+  ---
+  // src/components/Header.astro
+  ---
 
-<header class="header" id="main-header">
-  <div class="header__glass"></div>
-  <div class="header__scaler">
-  <div class="header__container">
-    
-    <div class="header__left">
-      <button class="header__menu-btn" aria-label="Abrir menu">
-        <span class="menu-btn__icon">
-          <i class="line"></i>
-          <i class="line"></i>
-        </span>
-        <span class="menu-btn__text">MENU</span>
-      </button>
-      <a href="#PACOTES" class="header__link">PACOTES</a>
-    </div>
+  <header class="header" id="main-header">
+    <div class="header__glass"></div>
+    <div class="header__container">
+      
+      <div class="header__left">
+        <button class="header__menu-btn" aria-label="Abrir menu">
+          <span class="menu-btn__icon">
+            <i class="line"></i>
+            <i class="line"></i>
+          </span>
+          <span class="menu-btn__text">MENU</span>
+        </button>
+        <a href="#PACOTES" class="header__link">PACOTES</a>
+      </div>
 
-<div class="header__center">
-  <a href="/" class="header__logo" aria-label="Carolina Alves Fotografia">
-    <span class="header__logo-text">Carolina</span>
-    <img src="/favicon.svg" alt="" class="logo__icon" />
+  <div class="header__center">
+    <a href="/" class="header__logo" aria-label="Carolina Alves Fotografia">
+      <span class="header__logo-text">Carolina</span>
+      <img src="/favicon.svg" alt="" class="logo__icon" />
+    </a>
+  </div>
+
+<div class="header__right">
+  <a href="#contact" class="header__link">RESERVAR MOMENTO</a>
+  
+  <a href="https://wa.me/5567992890225" target="_blank" class="header__whatsapp-btn" aria-label="WhatsApp" rel="noopener noreferrer">
+    <svg class="whatsapp__icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+    </svg>
   </a>
 </div>
 
-    <div class="header__right">
-      <a href="#contact" class="header__link">RESERVAR MOMENTO</a>
-      <button class="header__favorite-btn" aria-label="Favoritos">
-        <svg class="favorite__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </svg>
-      </button>
     </div>
-
-  </div>
-  </div>
-</header>
-
-<style>
-  :root {
-    --header-text-color: black; 
-    --header-font-sans: 'Inter', system-ui, sans-serif;
-    --header-font-serif: 'Playfair Display', serif;
-  }
-
-  /* RESET DE BOTÕES BÁSICO */
-  button {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    color: inherit;
-    font: inherit;
-  }
-
-  /* ESTRUTURA PRINCIPAL */
-  .header {
     
-    position: fixed;
+  </header>
+
+  <style>
+    :root {
+      --header-text-color: black; 
+      --header-font-sans: 'Inter', system-ui, sans-serif;
+      --header-font-serif: 'Playfair Display', serif;
+    }
+
+    /* RESET DE BOTÕES BÁSICO */
+    button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+    }
+
+    /* ESTRUTURA PRINCIPAL */
+    .header {
+      
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      padding-top: 2rem;
+      padding-right: 3rem;
+      padding-bottom: 1.5rem;
+      padding-left: 3rem;
+      color: var(--header-text-color);
+    }
+    
+    .header__glass {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 100;
-    padding-top: 2rem;
-    padding-right: 3rem;
-    padding-bottom: 1.5rem;
-    padding-left: 3rem;
-    color: var(--header-text-color);
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(5px) saturate(180%);
+    -webkit-backdrop-filter: blur(5px) saturate(180%);
+    transform: scaleY(0);
+    transform-origin: top;
+    z-index: -1; /* fica atrás do conteúdo */
+    pointer-events: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.101);
   }
+
+
+
+  .header__left,
+  .header__center,
+  .header__right {
+    will-change: transform;
+  }
+
+    .header__container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      position: relative; /* Define o limite do absolute da logo */
+    }
+
+    /* BLOCOS LATERAIS */
+    .header__left,
+    .header__right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem; /* Espaço entre os itens (ex: Menu e Residences) */
+    }
+
+    .header__center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header__logo-text {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    clip-path: inset(0 0 0 0); /* inicialmente totalmente visível */
+  }
+
+    
+    
+    /* TIPOGRAFIA E ELEMENTOS */
+    .header__link {
+      font-family: var(--header-font-sans);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--header-text-color);
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+
+    .header__link:hover {
+      opacity: 1;
+    }
+
+    /* BOTÃO MENU HAMBÚRGUER */
+    .header__menu-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--header-font-sans);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    .menu-btn__icon {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 24px;
+    }
+
+    .menu-btn__icon .line {
+      display: block;
+      width: 100%;
+      height: 1px;
+      background-color: var(--header-text-color);
+      transition: transform 0.3s ease;
+    }
+    
+    /* A linha de baixo no modelo é levemente mais curta */
+    .menu-btn__icon .line:nth-child(2) {
+      width: 70%; 
+    }
+
+  .header__logo {
+      font-family: var(--header-font-serif);
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--header-text-color);
+      text-decoration: none;
+      position: relative; /* OBRIGATÓRIO: Define as fronteiras para o ícone flutuar */
+      display: inline-block; /* O centro da tela será cravado no centro exato da palavra */
+    }
+  .logo__icon {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      
+      top: -15px;         /* Puxa para cima da linha do teto da palavra */
+      left: 100%;         /* Trava a borda esquerda do ícone na borda direita da palavra */
+      margin-left: -5px;  /* Ajuste fino empurrando levemente para a esquerda */
+      z-index: 2;
+    }
+
+    /* BOTÃO FAVORITO (Coração) */
+    .header__favorite-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+
+    .header__favorite-btn:hover {
+      opacity: 1;
+    }
+
+    .favorite__icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    /* Efeito de hover nos caracteres */
+  :global(.word) {
+    position: relative;
+    display: inline-block;
+  }
+
+  :global(.word .before),
+  :global(.word .after) {
+    display: block;
+  }
+
+  :global(.word .before .char) {
+    transform: translateY(0);
+    transition: transform 0.33s ease-in-out;
+  }
+
+  :global(.word .after) {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  :global(.word .after .char) {
+    transform: translateY(-100%);
+    transition: transform 0.33s ease-in-out;
+  }
+
+  :global(.word .after .char:nth-child(even)) {
+    transform: translateY(100%);
+  }
+
+  :global(.word:hover .before .char) {
+    transform: translateY(100%);
+  }
+
+  :global(.word:hover .before .char:nth-child(even)) {
+    transform: translateY(-100%);
+  }
+
+  :global(.word:hover .after .char) {
+    transform: translateY(0);
+  }
+    
   
-  .header__glass {
-  position: absolute;
-  top: 0;
-  left: 0;
+
+  
+.header__whatsapp-btn {
+  display: flex;           
+  align-items: center;
+  justify-content: center;
+  color: #1f1f1f;
+  width: 24px;             
+  height: 24px;        
+  transition: opacity 0.3s ease;
+}
+
+.header__whatsapp-btn:hover {
+  opacity: 0.8;
+}
+
+.whatsapp__icon {
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  transform: scaleY(0);
-  transform-origin: top;
-  z-index: -1; /* fica atrás do conteúdo */
-  pointer-events: none;
 }
 
-.header__scaler {
-  transform-origin: top;      /* ancora a compressão no topo */
-  width: 100%;
-}
 
-.header__left,
-.header__center,
-.header__right {
-  will-change: transform;
-}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem 1.5rem;
+  }
+
+
+
+  .header__right > .header__link {
+    display: none;
+  }
+
+  .menu-btn__text {
+    display: none;
+  }
 
   .header__container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    position: relative; /* Define o limite do absolute da logo */
+
   }
 
-  /* BLOCOS LATERAIS */
+  /* Logo à esquerda */
+  .header__center {
+    position: static;
+    transform: none;
+    order: 1;
+    margin-right: auto;
+  }
+
   .header__left,
   .header__right {
-    display: flex;
-    align-items: center;
-    gap: 3rem; /* Espaço entre os itens (ex: Menu e Residences) */
+    display: contents;   /
   }
 
-  /* BLOCO CENTRAL (Centro Matemático) */
-  .header__center {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* Ordem dos itens que ficarão à direita */
+  .header__link {            /* PACOTES */
+    order: 2;
+    margin-left: 0;
+    margin-right: 1rem;
   }
+  .header__whatsapp-btn {    /* WhatsApp */
+    order: 3;
+    margin-right: 1rem;
 
-  .header__logo-text {
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  clip-path: inset(0 0 0 0); /* inicialmente totalmente visível */
-}
-
-  
-  
-  /* TIPOGRAFIA E ELEMENTOS */
-  .header__link {
-    font-family: var(--header-font-sans);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--header-text-color);
-    opacity: 0.9;
-    transition: opacity 0.3s ease;
-  }
-
-  .header__link:hover {
-    opacity: 1;
-  }
-
-  /* BOTÃO MENU HAMBÚRGUER */
-  .header__menu-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-family: var(--header-font-sans);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-  }
-
-  .menu-btn__icon {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 24px;
-  }
-
-  .menu-btn__icon .line {
-    display: block;
-    width: 100%;
-    height: 1px;
-    background-color: var(--header-text-color);
-    transition: transform 0.3s ease;
-  }
-  
-  /* A linha de baixo no modelo é levemente mais curta */
-  .menu-btn__icon .line:nth-child(2) {
-    width: 70%; 
-  }
-
- .header__logo {
-    font-family: var(--header-font-serif);
-    font-size: 2rem;
-    font-weight: 400;
-    color: var(--header-text-color);
-    text-decoration: none;
-    position: relative; /* OBRIGATÓRIO: Define as fronteiras para o ícone flutuar */
-    display: inline-block; /* O centro da tela será cravado no centro exato da palavra */
-  }
-.logo__icon {
-    position: absolute;
-    width: 50px;
-    height: 50px;
     
-    top: -15px;         /* Puxa para cima da linha do teto da palavra */
-    left: 100%;         /* Trava a borda esquerda do ícone na borda direita da palavra */
-    margin-left: -5px;  /* Ajuste fino empurrando levemente para a esquerda */
-    z-index: 2;
+  }
+  .header__menu-btn {        /* MENU (hambúrguer) */
+    order: 4;
   }
 
-  /* BOTÃO FAVORITO (Coração) */
-  .header__favorite-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.9;
-    transition: opacity 0.3s ease;
+  /* Ajustes visuais */
+  .header__logo { font-size: 1rem; }
+  .logo__icon {
+    width: 25px;
+    height: 25px;
+    top: -10px;
+    margin-left: -3px;
   }
+}
+  
+    
+  </style>
 
-  .header__favorite-btn:hover {
-    opacity: 1;
-  }
+  <script>
+    import gsap from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import { SplitText } from 'gsap/SplitText';    
+    
+    gsap.registerPlugin(ScrollTrigger, SplitText);
 
-  .favorite__icon {
-    width: 20px;
-    height: 20px;
-  }
-</style>
-<script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-  gsap.registerPlugin(ScrollTrigger);
+    document.addEventListener('DOMContentLoaded', () => {
+      const header = document.querySelector('.header') as HTMLElement;
+      const glass = document.querySelector('.header__glass') as HTMLElement;
+      const logoText = document.querySelector('.header__logo-text') as HTMLElement;
+      const logoIcon = document.querySelector('.logo__icon') as HTMLElement;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const header = document.querySelector('.header') as HTMLElement;
-    const glass = document.querySelector('.header__glass') as HTMLElement;
-    const logoText = document.querySelector('.header__logo-text') as HTMLElement;
-    const logoIcon = document.querySelector('.logo__icon') as HTMLElement;
+       // ========== ANIMAÇÕES DE SCROLL SEPARADAS POR BREAKPOINT ==========
 
-    if (header && glass && logoText && logoIcon) {
+      const mm = gsap.matchMedia();
       
-      const textWidth = logoText.offsetWidth;
+     // Desktop: timeline completa (vidro, padding, wipe, ícone)
       
+  mm.add("(min-width: 769px)", () => {
+    
+      if (!header || !glass || !logoText || !logoIcon) return;
+        
+        const textWidth = logoText.offsetWidth;
+        
 
-      const tl = gsap.timeline({
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: document.body,
+            start: 'top -100', 
+            toggleActions: 'play none none reverse',
+          },
+          defaults: {
+            duration: 0.8,       
+            ease: 'expo.out' 
+          }
+        });
+        
+        
+
+        tl.to(glass, {
+          scaleY: 1,
+        }, 0);
+
+        tl.to(header, {
+          paddingTop: 30,
+          paddingRight: 70,
+          paddingBottom: 30,
+          paddingLeft: 70,
+        }, 0);
+        
+        tl.to(logoText, {
+          clipPath: `inset(0 ${textWidth + 30}px 0 0)`, 
+        }, 0);
+        
+        gsap.set(logoIcon, { scale: 30 / 50 });
+        
+        // O Ícone assume o centro e cresce via placa de vídeo (GPU)
+    tl.to(logoIcon, {
+          scale: 1,           // Volta para os 50px reais
+          top: "50%",         // Crava no eixo Y central
+          left: "50%",        // Crava no eixo X central
+          xPercent: -50,      // Ajuste matemático de âncora (translate)
+          yPercent: -50,      // Ajuste matemático de âncora (translate)
+          marginLeft: 0       // Anula a margem de ajuste fino no CSS
+        }, 0);
+          return () => {
+        tl.kill();
+      };
+      })
+      
+      // Mobile: apenas vidro e padding
+      
+      mm.add("(max-width: 768px)", () => {
+        if (!header || !glass) return;
+        
+        const tl = gsap.timeline({
         scrollTrigger: {
           trigger: document.body,
-          start: 'top -100', 
+          start: 'top -100',
           toggleActions: 'play none none reverse',
         },
         defaults: {
-          duration: 0.8,       
-          ease: 'expo.out' 
+          duration: 0.8,
+          ease: 'expo.out'
         }
       });
-      
-      
 
-      tl.to(glass, {
-        scaleY: 1,
-      }, 0);
-
+      tl.to(glass, { scaleY: 1 }, 0);
+      
       tl.to(header, {
-        paddingTop: 30,
-        paddingRight: 70,
-        paddingBottom: 30,
-        paddingLeft: 70,
+        paddingTop: 20,
+        paddingRight: 30,
+        paddingBottom: 20,
+        paddingLeft: 30,
       }, 0);
+
+      return () => {
+        tl.kill();
+      };
+        
+      })
       
-      tl.to(logoText, {
-        clipPath: `inset(0 ${textWidth + 30}px 0 0)`, 
-      }, 0);
+    // EFEITO DE HOVER NOS TEXTOS DO HEADER
+    
+  const menuBtnText = document.querySelector('.menu-btn__text'); 
+    const pacotesLink = document.querySelector('.header__left .header__link'); 
+    const ctaLink = document.querySelector('.header__right .header__link');   
+    
+    const hoverTargets = [menuBtnText, pacotesLink, ctaLink].filter(Boolean);
       
-      gsap.set(logoIcon, { scale: 30 / 50 });
-      
-      // O Ícone assume o centro e cresce via placa de vídeo (GPU)
-  tl.to(logoIcon, {
-        scale: 1,           // Volta para os 50px reais
-        top: "50%",         // Crava no eixo Y central
-        left: "50%",        // Crava no eixo X central
-        xPercent: -50,      // Ajuste matemático de âncora (translate)
-        yPercent: -50,      // Ajuste matemático de âncora (translate)
-        marginLeft: 0       // Anula a margem de ajuste fino no CSS
-      }, 0);
-      
-    }
-  });
-</script>
+    hoverTargets.forEach(el => {
+      const split = SplitText.create(el, {
+        type: "chars,words",
+        wordsClass: "word",
+        charsClass: "char",
+        mask: "words",
+        autoSplit: true,
+        onSplit: (self) => {
+          self.words.forEach((word) => {
+            const content = word.innerHTML;
+            word.innerHTML = "";
+            // Camada superior (original)
+            const before = document.createElement("div");
+            before.classList.add("before");
+            before.innerHTML = content;
+            // Camada inferior (duplicata escondida)
+            const after = document.createElement("div");
+            after.classList.add("after");
+            after.innerHTML = content;
+            after.setAttribute("aria-hidden", "true");
+
+            word.append(before, after);
+          });
+        }
+      });
+    });
+    
+    });
+  </script>
