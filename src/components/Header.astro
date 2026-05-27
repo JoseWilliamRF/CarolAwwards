@@ -26,7 +26,7 @@
 </div>
 
     <div class="header__right">
-      <a href="#contact" class="header__link">SOLICITAR ORÇAMENTO</a>
+      <a href="#contact" class="header__link">RESERVAR MOMENTO</a>
       <button class="header__favorite-btn" aria-label="Favoritos">
         <svg class="favorite__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -39,9 +39,8 @@
 </header>
 
 <style>
-  /* Variáveis baseadas na paleta da imagem */
   :root {
-    --header-text-color: black; /* Tom creme/bege do texto */
+    --header-text-color: black; 
     --header-font-sans: 'Inter', system-ui, sans-serif;
     --header-font-serif: 'Playfair Display', serif;
   }
@@ -89,7 +88,6 @@
 .header__scaler {
   transform-origin: top;      /* ancora a compressão no topo */
   width: 100%;
-  /* a altura é definida pelo conteúdo interno */
 }
 
 .header__left,
@@ -195,7 +193,6 @@
     width: 50px;
     height: 50px;
     
-    /* POSIÇÃO INICIAL: O QUADRADO AZUL */
     top: -15px;         /* Puxa para cima da linha do teto da palavra */
     left: 100%;         /* Trava a borda esquerda do ícone na borda direita da palavra */
     margin-left: -5px;  /* Ajuste fino empurrando levemente para a esquerda */
@@ -235,7 +232,6 @@
       
       const textWidth = logoText.offsetWidth;
       
-      const moveX = -(textWidth / 2 + 2);
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -244,10 +240,12 @@
           toggleActions: 'play none none reverse',
         },
         defaults: {
-          duration: 0.9,       
+          duration: 0.8,       
           ease: 'expo.out' 
         }
       });
+      
+      
 
       tl.to(glass, {
         scaleY: 1,
@@ -261,19 +259,19 @@
       }, 0);
       
       tl.to(logoText, {
-        clipPath: `inset(0 ${textWidth}px 0 0)`, 
+        clipPath: `inset(0 ${textWidth + 30}px 0 0)`, 
       }, 0);
       
       gsap.set(logoIcon, { scale: 30 / 50 });
       
       // O Ícone assume o centro e cresce via placa de vídeo (GPU)
- tl.to(logoIcon, {
+  tl.to(logoIcon, {
         scale: 1,           // Volta para os 50px reais
         top: "50%",         // Crava no eixo Y central
         left: "50%",        // Crava no eixo X central
         xPercent: -50,      // Ajuste matemático de âncora (translate)
         yPercent: -50,      // Ajuste matemático de âncora (translate)
-        marginLeft: 0       // Anula a margem de ajuste fino que usamos no CSS
+        marginLeft: 0       // Anula a margem de ajuste fino no CSS
       }, 0);
       
     }
