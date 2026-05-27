@@ -1,14 +1,26 @@
 ---
 import MainLayout from '../layout/MainLayout.astro';
 import Header from '../components/Header.astro'
-import TestSection from '../components/TestSection.astro'
+import Hero from '../components/Hero.astro';
 import TestSection2 from '../components/TestSection2.astro';
 ---
-
-<MainLayout title="Carol | Fotografia" description="Fotografia com olhar sensível e acolhedor.">
+<MainLayout title="Carol | Fotografia" description="...">
   <Header />
-<main>
-    <TestSection />
-    <TestSection2 />
-</main>
+  <main>
+    <Hero />
+    <section class="next-section">
+      <h2>Próxima Seção</h2>
+      <p>Conteúdo que cobre a Hero ao rolar.</p>
+    </section>
+  </main>
 </MainLayout>
+
+<style>
+  .next-section {
+    position: relative;
+    z-index: 2;
+    background: #ffffff;
+    min-height: 100vh;
+    padding: 5rem 2rem;
+  }
+</style>

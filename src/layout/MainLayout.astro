@@ -15,7 +15,6 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
 
-    <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -25,26 +24,30 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
 
     <title>{title}</title>
 
-    <!-- Favicons -->
-<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="shortcut icon" href="/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
   </head>
 
   <body>
     <slot />
+
     
-      <script>
-    import Lenis from 'lenis';
-    import gsap from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    
+    
+    <script>
+  import Lenis from 'lenis';
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-    gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger);
 
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. INICIALIZAÇÃO DO LENIS
     const lenis = new Lenis({
-      lerp: 0.08,
+      lerp: 0.05,
       smoothWheel: true,
     });
 
@@ -53,8 +56,50 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
     });
     gsap.ticker.lagSmoothing(0);
 
-    lenis.on('scroll', ScrollTrigger.update);
-  </script>
+    const thumb = document.createElement('div');
+    thumb.classList.add('custom-scrollbar-thumb');
+    document.body.appendChild(thumb);
+
+    let hideScrollbarTimer: ReturnType<typeof setTimeout>;
+
+    lenis.on('scroll', (e) => {
+      ScrollTrigger.update();
+      
+      // Calcula o tamanho e posição do puxador virtual
+      const progress = e.progress; // Vai de 0 a 1
+      const thumbHeight = Math.max((window.innerHeight / document.body.scrollHeight) * window.innerHeight, 50);
+      const thumbY = progress * (window.innerHeight - thumbHeight);
+      
+      thumb.style.height = `${thumbHeight}px`;
+      thumb.style.transform = `translateY(${thumbY}px)`;
+      
+      // Lógica de Fade In/Out
+      thumb.style.opacity = '1';
+      clearTimeout(hideScrollbarTimer);
+      hideScrollbarTimer = setTimeout(() => {
+        thumb.style.opacity = '0';
+      }, 1500);
+    });
+
+    // 3. SNAP MAGNÉTICO UNIVERSAL
+    const sections = gsap.utils.toArray('section'); 
+
+    sections.forEach((sec) => {
+      ScrollTrigger.create({
+        trigger: sec as HTMLElement,
+        start: "top bottom", 
+        end: "top top",      
+        snap: {
+          snapTo: 1, 
+          duration: { min: 0.4, max: 1 }, 
+          delay: 0.1, 
+          ease: "power4.out" 
+        }
+      });
+    });
+  });
+</script>
+  
   </body>
 </html>
 
@@ -78,16 +123,32 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
   ol {
     list-style: none;
   }
-
-  /* 3. Configuração base do documento */
+  
+  /* OCULTA A BARRA FÍSICA NATIVA EM TODOS OS NAVEGADORES */
   html {
-    scrollbar-gutter: stable;
-    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  ::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 
+  /* ESTILIZA A BARRA VIRTUAL FLUTUANTE */
+  .custom-scrollbar-thumb {
+    position: fixed;
+    top: 0;
+    right: 4px;
+    width: 6px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Impede que bloqueie cliques nos elementos abaixo */
+  }
+  
+
   body {
-    background-color: white;
-    color: #1a1a1a;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
