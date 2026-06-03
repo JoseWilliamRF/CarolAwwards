@@ -1,8 +1,6 @@
 ---
 // src/components/Hero.astro
 
-// Array simulando proporções diferentes para gerar a assimetria visual.
-// O 'ratio' dita a largura da imagem em relação à altura fixa da faixa.
 const imagesTopBot = [
   { src: '../../public/imagens/ensaios/ensaios1.jpg', ratio: '3/4' },
   { src: '../../public/imagens/ensaios/ensaios2.jpg', ratio: '3/4' },
@@ -19,14 +17,12 @@ const imagesMid = [
   { src: '../../public/imagens/significados/momentos4.jpg', ratio: '3/4' }
 ];
 
-// Multiplicamos por 3 para garantir que a faixa seja mais larga que a diagonal do monitor.
-// Isso impede que o usuário veja o "fundo falso" antes do loop reiniciar.
 const trackTopBot = [...imagesTopBot, ...imagesTopBot, ...imagesTopBot];
 const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
 ---
 
-<section class="hero" id="hero">
-  <div class="hero__grid-wrapper">
+<section class="hero section" id="hero" >
+  <div class="hero__grid-wrapper" >
     
     <div class="hero__track track-left track-small">
       {trackTopBot.map((item,index) => (
@@ -55,26 +51,28 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
   </div>
 
   <div class="hero__overlay"></div>
-
-  <div class="hero__content">
-    <h1 class="hero__title">Carolina<br/>Alves</h1>
-    <p class="hero__subtitle">Há 14 anos revelando a essência e a força feminina<br> em Campo Grande. Um espaço de acolhimento para<br> você se ver por inteiro e ressignificar sua história.</p>
-  </div>
+<div class="hero__content">
+  <h1 class="hero__title">
+    <img 
+      src="/logo-nome.svg" 
+      alt="Carolina Alves" 
+      class="hero__title-svg"
+    />
+  </h1>
+  <p class="hero__subtitle">Há 14 anos revelando a essência e a força feminina<br> em Campo Grande. Um espaço de acolhimento para<br> você se ver por inteiro e ressignificar sua história.</p>
+</div>
 </section>
-<style>
-  :root {
-    --hero-bg: #e7e7e7; 
-    --hero-text: black; 
-  }
- 
-  
 
-  
+
+<style>
+
+
+
   .hero {
     position: sticky;
     top: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     background-color: var(--hero-bg);
     z-index: 1;
@@ -126,6 +124,7 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
     object-fit: cover;
     opacity: 0.6;
     transition: opacity 0.4s ease;
+    filter: grayscale(100%);
     user-drag: none;
     -webkit-user-drag: none;
     user-select: none;
@@ -142,8 +141,8 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
   left: 0;
   width: 100vw;
   height: 100%;
-  background:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.586) 0%, rgba(255, 255, 255, 0) 15%);
+  background: radial-gradient(circle, rgba(8,13,11,0.5) 0%, rgba(8,13,11,0.5) 20%);
+
   pointer-events: none;
   z-index: 5;
 }
@@ -160,24 +159,29 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
     pointer-events: auto; 
   }
 
-  .hero__title {
-    font-family: var(--header-font-serif, serif);
-    font-size: clamp(3rem, 8vw, 8rem);
-    line-height: 1;
-    color: var(--hero-text);
-    margin: 0;
-    text-align: right;
-    letter-spacing: -1px; 
-  }
+.hero__title {
+  font-size: 0;          /* elimina espaço extra do inline-block */
+  line-height: 0;
+  margin: 0;
+  text-align: right;
+}
+
+.hero__title-svg { 
+  color: white;
+  width: 100%;
+  max-width: 600px;     
+  height: auto;
+  display: inline-block; /* permite alinhamento à direita */
+}
 
   .hero__subtitle {
-    font-family: var(--header-font-sans, sans-serif);
     font-size: clamp(0.9rem, 1rem, 1.1rem);  
-    color: var(--hero-text);
+    color: var(--color-text);
     position: absolute;
     top: 50%;
     left: 10%;
     letter-spacing: -1px;
+    line-height: 1.3;
   }
 
   /* MEDIA QUERIES MOBILE */
@@ -185,39 +189,70 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
     .track-small { height: 40vh; }
     .track-large { height: 50vh; }
     .hero__grid-wrapper { transform: translate(-50%, -50%) rotate(-20deg); } /* Suaviza a angulação em telas estreitas */
-    .hero__subtitle { top: 20%; width: 80%; }
+    .hero__subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 0.95rem);   /* ligeiramente menor que o desktop */
+    width: 90%;                                   /* mais espaço horizontal */
+    left: 5%;                                     /* centraliza compensando a largura */
+    top: 40%;                                     /* mantém a posição vertical */
+    line-height: 1.4;
   }
+  }
+    
 </style>
+
 
 <script>
   import gsap from 'gsap';
 
   document.addEventListener('DOMContentLoaded', () => {
-    let ctx = gsap.context(() => {
-      
-      const trackLeft = document.querySelectorAll('.track-left');
-      const trackRight = document.querySelectorAll('.track-right');
+    const trackLeft = document.querySelectorAll('.track-left');
+    const trackRight = document.querySelectorAll('.track-right');
 
+    // Movimento linear contínuo para a esquerda
+    if (trackLeft.length > 0) {
+      gsap.to(trackLeft, {
+        xPercent: -33.33,
+        duration: 40,
+        ease: 'none',
+        repeat: -1,
+      });
+    }
 
-      if (trackLeft.length) {
-        gsap.to(trackLeft, {
-          xPercent: -33.33,
-          duration: 40, 
-          ease: 'none',
-          repeat: -1
-        });
-      }
+    // Movimento linear contínuo para a direita
+    if (trackRight.length > 0) {
+      gsap.set(trackRight, { xPercent: -33.33 });
+      gsap.to(trackRight, {
+        xPercent: 0,
+        duration: 40,
+        ease: 'none',
+        repeat: -1,
+      });
+    }
+    
+  // Pausar tracks quando a Hero for totalmente coberta
+    
+    const hero = document.querySelector('#hero') as HTMLElement;
+    const lenis = (window as any).lenisInstance;
+    let tracksPaused = false;
 
-      if (trackRight.length) {
-        gsap.set(trackRight, { xPercent: -33.33 });
-        gsap.to(trackRight, {
-          xPercent: 0,
-          duration: 40,
-          ease: 'none',
-          repeat: -1
-        });
-      }
+      lenis.on('scroll', ({ scroll }: { scroll: number }) => {
+        const heroHeight = hero.offsetHeight;
+        const tweens = gsap.getTweensOf('.track-left, .track-right');
 
-    });
-  });
+        if (scroll >= heroHeight) {
+          if (!tracksPaused) {
+            tracksPaused = true;
+            tweens.forEach(t => t.pause());
+          }
+        } else {
+          if (tracksPaused) {
+            tracksPaused = false;
+            tweens.forEach(t => t.resume());
+          }
+        }
+      });
+});
+  
+
+  
 </script>

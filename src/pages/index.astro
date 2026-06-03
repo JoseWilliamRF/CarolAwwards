@@ -1,26 +1,15 @@
 ---
 import MainLayout from '../layout/MainLayout.astro';
-import Header from '../components/Header.astro'
+import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
-import TestSection2 from '../components/TestSection2.astro';
+import Section from '../components/Section.astro';
 ---
 <MainLayout title="Carol | Fotografia" description="...">
   <Header />
   <main>
     <Hero />
-    <section class="next-section">
-      <h2>Próxima Seção</h2>
-      <p>Conteúdo que cobre a Hero ao rolar.</p>
-    </section>
+    <Section className="portfolio">
+      <h2>Portfólio</h2>
+    </Section>
   </main>
 </MainLayout>
-
-<style>
-  .next-section {
-    position: relative;
-    z-index: 2;
-    background: #ffffff;
-    min-height: 100vh;
-    padding: 5rem 2rem;
-  }
-</style>
