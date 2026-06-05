@@ -1,0 +1,297 @@
+---
+// Quando integrar o Prismic, estes arrays virão do fetch dinâmico.
+const leftImages = [
+  '/imagens/ensaios/ensaios1.jpg',
+  '/imagens/ensaios/ensaios2.jpg',
+  '/imagens/ensaios/ensaios3.jpg',
+  '/imagens/ensaios/ensaios4.jpg',
+];
+const rightImages = [
+  '/imagens/ensaios/ensaios5.jpg',
+  '/imagens/ensaios/ensaios6.jpg',
+  '/imagens/significados/momentos1.jpg',
+  '/imagens/significados/momentos2.jpg',
+];
+---
+
+<div id="preloader" class="preloader">
+  <div class="preloader__glass preloader__glass--left"></div>
+  <div class="preloader__glass preloader__glass--right"></div>
+  
+  <div class="preloader__track preloader__track--left">
+    {leftImages.map((src) => (
+      <div class="preloader__slide">
+        <img src={src} alt="" loading="eager" fetchpriority="high" />
+      </div>
+    ))}
+  </div>
+
+  <div class="preloader__track preloader__track--right">
+    {rightImages.map((src) => (
+      <div class="preloader__slide">
+        <img src={src} alt="" loading="eager" fetchpriority="high" />
+      </div>
+    ))}
+  </div>
+
+  <div class="preloader__logo">
+    <img src="/logo-nome.svg" alt="Carolina Alves" />
+  </div>
+</div>
+
+<style>
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background-color: var(--color-overlay, #080D0B);
+    touch-action: none;
+    transition: opacity 0.8s ease-out;
+    display: flex;
+  }
+
+  html.is-preloader-disabled .preloader {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .preloader__track {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100dvh;
+    will-change: transform;
+  }
+
+  .preloader__track--left { left: 0; }
+  .preloader__track--right { right: 0; }
+
+  .preloader__slide {
+    position: absolute;
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden; 
+  }
+  
+  .preloader__glass {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100dvh;
+    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.05);
+    will-change: transform;
+    z-index: 5;
+  }
+  .preloader__glass--left { left: 0; }
+  .preloader__glass--right { right: 0; }
+
+  .preloader__slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+    filter: grayscale(100%);
+    will-change: transform;
+    transform: scale(1.1); 
+  }
+
+  .preloader__logo {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    width: 40vw;
+    max-width: 400px;
+    height: fit-content;
+    margin: auto;
+  }
+
+  @media (max-width: 768px) {
+    /* OBRIGATÓRIO: Vidro adicionado à exclusão mobile para evitar filtro fantasma */
+    .preloader__track, .preloader__glass {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const DEBUG = false;
+  let introSeen = false;
+
+  // BLINDAGEM 1: Try/Catch no SessionStorage (Previne quebra no Safari Private Mode)
+  try {
+    introSeen = sessionStorage.getItem('introSeen') === 'true';
+  } catch (e) {
+    introSeen = false;
+  }
+
+  if (!introSeen || DEBUG) {
+    try {
+      sessionStorage.setItem('introSeen', 'true');
+    } catch (e) {}
+
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+      document.documentElement.style.overflow = 'hidden';
+
+      let networkProgress = 0;
+      let rafId: number;
+
+      const PARALLAX_FACTOR = 1;
+
+      const leftTrack = preloader.querySelector('.preloader__track--left') as HTMLElement;
+      const rightTrack = preloader.querySelector('.preloader__track--right') as HTMLElement;
+      const glassLeft = preloader.querySelector('.preloader__glass--left') as HTMLElement | null;
+      const glassRight = preloader.querySelector('.preloader__glass--right') as HTMLElement | null;
+      const leftSlides = Array.from(leftTrack.querySelectorAll('.preloader__slide')) as HTMLElement[];
+      const rightSlides = Array.from(rightTrack.querySelectorAll('.preloader__slide')) as HTMLElement[];
+
+      leftSlides.forEach((slide, i) => slide.style.top = `${i * 100}dvh`);
+      rightSlides.forEach((slide, i) => slide.style.top = `${-i * 100}dvh`);
+
+      const slideCount = Math.max(leftSlides.length, rightSlides.length);
+      const maxOffset = Math.max((slideCount - 1) * 100, 0);
+      const glassMaxOffset = 100;
+
+      const START_DELAY = 600;
+      const LERP = 0.08;
+      const CLAMPED_STEP = 0.0030; 
+
+      let phase = 0;            
+      let phaseProgress = 0;    
+      let delayElapsed = false;
+
+      // BLINDAGEM 2: Timeout de Segurança Absoluta (Se a rede travar por 8s, força a saída)
+      const safetyTimeout = setTimeout(() => {
+        if (networkProgress < 1) networkProgress = 1;
+      }, 8000);
+
+      // BLINDAGEM 3: Rastreador de Rede Real para Produção
+      const initNetworkTracker = () => {
+        const images = Array.from(preloader.querySelectorAll('img'));
+        const totalImages = images.length;
+        let loadedCount = 0;
+
+        if (totalImages === 0) {
+          networkProgress = 1;
+        } else {
+          images.forEach(img => {
+            if (img.complete) {
+              loadedCount++;
+              networkProgress = loadedCount / totalImages;
+            } else {
+              img.addEventListener('load', () => {
+                loadedCount++;
+                networkProgress = loadedCount / totalImages;
+              });
+              img.addEventListener('error', () => {
+                loadedCount++;
+                networkProgress = loadedCount / totalImages; // Avança mesmo com erro para não travar a tela
+              });
+            }
+          });
+        }
+      };
+
+      const delayTimeout = setTimeout(() => {
+        delayElapsed = true;
+        initNetworkTracker(); // A escuta de rede só começa a impactar a animação após o delay
+      }, START_DELAY);
+
+      const render = () => {
+        if (!delayElapsed) {
+          rafId = requestAnimationFrame(render);
+          return;
+        }
+        
+        const speedMultiplier = phase === 0 ? Math.max((maxOffset / 100), 1) : 1;
+        const currentLerp = LERP * speedMultiplier;
+        const currentClamp = CLAMPED_STEP * speedMultiplier;
+
+        const distance = networkProgress - phaseProgress; // BLINDAGEM 4: Reconectado à variável de rede real
+        const baseStep = distance * currentLerp;
+        const step = Math.min(baseStep, currentClamp);
+        // Só avança se o step for positivo (impede recuo se a rede atrasar)
+        if (step > 0) {
+          phaseProgress = Math.min(phaseProgress + step, 1);
+        }
+
+        // --- FASE 0: VIDRO ---
+        if (phase === 0) {
+          const offset = phaseProgress * glassMaxOffset;
+          if (glassLeft) glassLeft.style.transform = `translateY(-${offset}dvh)`;
+          if (glassRight) glassRight.style.transform = `translateY(${offset}dvh)`;
+
+          if (phaseProgress > 0.999) {
+            phaseProgress = 1;
+          }
+
+          if (phaseProgress >= 1) {
+            phase = 1;
+            phaseProgress = 0; 
+          }
+        }
+
+        // --- FASE 1: IMAGENS ---
+        else if (phase === 1) {
+          const offset = phaseProgress * maxOffset;
+
+          leftTrack.style.transform = `translateY(-${offset}dvh)`;
+          rightTrack.style.transform = `translateY(${offset}dvh)`;
+
+          leftSlides.forEach((slide, i) => {
+            const absoluteY = (i * 100) - offset;
+            const img = slide.querySelector('img') as HTMLElement;
+            img.style.transform = `translateY(${-absoluteY * PARALLAX_FACTOR}dvh) scale(1.1)`;
+          });
+          rightSlides.forEach((slide, i) => {
+            const absoluteY = (-i * 100) + offset;
+            const img = slide.querySelector('img') as HTMLElement;
+            img.style.transform = `translateY(${-absoluteY * PARALLAX_FACTOR}dvh) scale(1.1)`;
+          });
+            
+          if (phaseProgress > 0.999) {
+            phaseProgress = 1;
+          }
+          
+          if (phaseProgress >= 1 && networkProgress >= 1) {
+            phase = 2;
+            leftTrack.style.transform = `translateY(-${maxOffset}dvh)`;
+            rightTrack.style.transform = `translateY(${maxOffset}dvh)`;
+            if (glassLeft) glassLeft.style.transform = `translateY(-${glassMaxOffset}dvh)`;
+            if (glassRight) glassRight.style.transform = `translateY(${glassMaxOffset}dvh)`;
+
+            if (!DEBUG) {
+              preloader.style.setProperty('--progress', '1');
+              document.documentElement.classList.add('is-preloader-disabled');
+              
+              // BLINDAGEM 5: Previne dupla execução do evento "preloaderComplete"
+              let isRemoved = false;
+              const removePreloader = () => {
+                if (isRemoved) return;
+                isRemoved = true;
+                clearTimeout(safetyTimeout);
+                preloader.remove();
+                document.documentElement.style.overflow = '';
+                window.dispatchEvent(new Event('preloaderComplete'));
+              };
+              
+              preloader.addEventListener('transitionend', removePreloader, { once: true });
+              setTimeout(removePreloader, 1500);
+            }
+            cancelAnimationFrame(rafId);
+            return;
+          }
+        }
+
+        rafId = requestAnimationFrame(render);
+      };
+
+      rafId = requestAnimationFrame(render);
+    }
+  } else {
+    document.getElementById('preloader')?.remove();
+    document.documentElement.classList.add('is-preloader-disabled');
+    requestAnimationFrame(() => window.dispatchEvent(new Event('preloaderComplete')));
+  }
+</script>
