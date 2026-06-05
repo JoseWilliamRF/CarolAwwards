@@ -1,15 +1,33 @@
 ---
-
 // src/layout/MainLayout.astro
 import Preloader from '../components/Preloader.astro';
 
+import { client } from '../lib/prismic'; 
 
+// Busca o Singleton 'settings'
+let settings;
+try {
+  settings = await client.getSingle('settings');
+} catch (error) {
+  console.error("Erro ao buscar 'settings' no Prismic:", error);
+}
+
+// Definição de Props com Fallback para o CMS
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
 }
 
-const { title, description = "Portfólio Carolina Alves" } = Astro.props;
+//Mapeamento estrito dos API ID
+const { 
+  title = settings?.data.site_title as string || "Portfólio Carolina Alves", 
+  description = settings?.data.site_description as string || "Fotografia e Design"
+} = Astro.props;
+
+// Extração do Logo Global para uso futuro (Header/Footer)
+const globalLogo = settings?.data.logo?.url;
+const ogImage = settings?.data.og_image?.url;
+
 ---
 
 <!DOCTYPE html>
@@ -18,7 +36,20 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    
+    <!-- SEO Dinâmico -->
     <meta name="description" content={description} />
+    <title>{title}</title>
+    
+    
+    
+  <!-- Open Graph / Redes Sociais -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={ogImage ?? globalLogo ?? '/logo-nome.svg'} />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:site_name" content="Carolina Alves Fotografia" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,8 +57,6 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&family=Playfair+Display:wght@400;600&display=swap"
       rel="stylesheet"
     />
-
-    <title>{title}</title>
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -37,22 +66,20 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
   </head>
 
   <body>
-    <Preloader/>
+    <!-- Se for usar imagens dinâmicas no preloader, passaremos os dados como prop futuramente -->
+    <Preloader />
     
-  <slot />
+    <slot />
   
-  <script>
-    
-    import { initScrollEngine } from '../scripts/scrollEngine';
-    initScrollEngine(); 
-  </script>
-
-</body>
+    <script>
+      import { initScrollEngine } from '../scripts/scrollEngine';
+      initScrollEngine(); 
+      
+    </script>
+  </body>
 </html>
 
 <style is:global>
-  
-  
   :root {
     --hero-bg: #e7e7e7; 
     --font-sans: 'Montserrat', sans-serif;
@@ -61,7 +88,6 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
     --header-text-color: #F4F4F4;
   }
 
-  
   /* 1. Reset de box model */
   *,
   *::before,
@@ -70,7 +96,6 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
     margin: 0;
     padding: 0;
   }
-
 
   /* 2. Remover decorações de links e listas */
   a {
@@ -84,18 +109,17 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
   }
 
   body {
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  line-height: 1.5;
-  text-rendering: geometricPrecision;
-  font-feature-settings: "kern" 1;
-  font-kerning: normal;
-  letter-spacing: -0.02em;
-  
-  
-}
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    line-height: 1.5;
+    text-rendering: geometricPrecision;
+    font-feature-settings: "kern" 1;
+    font-kerning: normal;
+    letter-spacing: -0.02em;
+    background-color: var(--color-overlay); 
+  }
 
   /* 4. Imagens como bloco */
   img,
@@ -119,20 +143,13 @@ const { title, description = "Portfólio Carolina Alves" } = Astro.props;
   }
 
   /* 6. Tipografia base para headings */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
     line-height: 1.2;
   }
 
   /* 7. Inputs e selects */
-  input,
-  textarea,
-  select {
+  input, textarea, select {
     font: inherit;
     color: inherit;
   }
