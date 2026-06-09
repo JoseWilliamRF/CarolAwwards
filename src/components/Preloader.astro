@@ -1,17 +1,71 @@
 ---
-// Quando integrar o Prismic, estes arrays virão do fetch dinâmico.
-const leftImages = [
+
+import { client } from '../lib/prismic';
+
+
+//otimização Imgix
+
+const optimizeImg = (url: string | undefined) => {
+  if (!url) return '';
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}auto=format,compress&w=800&q=80`;
+};
+
+
+
+const [preloaderData, settingsData] = await Promise.all([
+  client.getSingle('preloader').catch(() => null),
+  client.getSingle('settings').catch(() => null),
+]);
+// Fallbacks estáticos (imagens originais)
+const defaultLeft = [
   '/imagens/ensaios/ensaios1.jpg',
   '/imagens/ensaios/ensaios2.jpg',
   '/imagens/ensaios/ensaios3.jpg',
   '/imagens/ensaios/ensaios4.jpg',
 ];
-const rightImages = [
+const defaultRight = [
   '/imagens/ensaios/ensaios5.jpg',
   '/imagens/ensaios/ensaios6.jpg',
   '/imagens/significados/momentos1.jpg',
   '/imagens/significados/momentos2.jpg',
 ];
+
+
+
+// Logo: prioriza a 'custom_logo' do preloader, depois a global do settings, depois o SVG local
+const logoUrl = preloaderData?.data.custom_logo?.url
+  || settingsData?.data.logo_nome?.url
+  || '/logo-nome.svg';
+const logoAlt = settingsData?.data.site_title || 'Carolina Alves';
+
+
+
+// Imagens das tracks (com fallback)
+let leftImages = defaultLeft;
+let rightImages = defaultRight;
+
+
+
+const leftPrismic = preloaderData?.data?.left_track;
+const rightPrismic = preloaderData?.data?.right_track;
+
+
+if (leftPrismic && leftPrismic.length > 0) {
+leftImages = leftPrismic.map((item: any) => optimizeImg(item.image?.url)).filter(Boolean);
+  while (leftImages.length < 4) {
+    leftImages.push(leftImages[leftImages.length - 1]); 
+  }
+  leftImages = leftImages.slice(0, 4); 
+}
+if (rightPrismic && rightPrismic.length > 0) {
+  rightImages = rightPrismic.map((item: any) => optimizeImg(item.image?.url)).filter(Boolean);
+  while (rightImages.length < 4) {
+    rightImages.push(rightImages[rightImages.length - 1]);
+  }
+  rightImages = rightImages.slice(0, 4);
+}
+
 ---
 
 <div id="preloader" class="preloader">
@@ -27,16 +81,17 @@ const rightImages = [
   </div>
 
   <div class="preloader__track preloader__track--right">
-    {rightImages.map((src) => (
-      <div class="preloader__slide">
-        <img src={src} alt="" loading="eager" fetchpriority="high" />
+    {rightImages.map((src) => (<div class="preloader__slide">
+        <img src={src} alt="" loading="lazy" decoding="async" />
       </div>
     ))}
   </div>
 
   <div class="preloader__logo">
-    <img src="/logo-nome.svg" alt="Carolina Alves" />
+    <img src={logoUrl} alt={logoAlt} />
   </div>
+  
+  <!-- <div id="preloader-counter" class="preloader__counter">0%</div> -->
 </div>
 
 <style>
@@ -48,6 +103,7 @@ const rightImages = [
     touch-action: none;
     transition: opacity 0.8s ease-out;
     display: flex;
+    will-change: opacity;
   }
 
   html.is-preloader-disabled .preloader {
@@ -105,20 +161,44 @@ const rightImages = [
     height: fit-content;
     margin: auto;
   }
+  
+  .preloader__counter {
+    position: absolute;
+    bottom: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    color: var(--c-beige-background, #f5e8d1);
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    font-variant-numeric: tabular-nums;
+  }
 
   @media (max-width: 768px) {
-    /* OBRIGATÓRIO: Vidro adicionado à exclusão mobile para evitar filtro fantasma */
-    .preloader__track, .preloader__glass {
-      display: none;
+    /* 1. Mata o lado direito (esteira e vidro) da árvore de pintura do navegador */
+    .preloader__track--right, 
+    .preloader__glass--right {
+      display: none !important;
     }
-  }
+
+    /* 2. Expande o lado esquerdo (esteira e vidro) para cobrir o celular inteiro */
+    .preloader__track--left, 
+    .preloader__glass--left {
+      width: 100% !important;
+      }
+    }
+  
 </style>
+
 
 <script>
   const DEBUG = false;
   let introSeen = false;
 
-  // BLINDAGEM 1: Try/Catch no SessionStorage (Previne quebra no Safari Private Mode)
+  // ==========================================================================
+  // 1. BLINDAGEM DE SESSÃO
+  // ==========================================================================
   try {
     introSeen = sessionStorage.getItem('introSeen') === 'true';
   } catch (e) {
@@ -131,44 +211,77 @@ const rightImages = [
     } catch (e) {}
 
     const preloader = document.getElementById('preloader');
+    
     if (preloader) {
       document.documentElement.style.overflow = 'hidden';
 
-      let networkProgress = 0;
-      let rafId: number;
-
-      const PARALLAX_FACTOR = 1;
-
+      // ==========================================================================
+      // 2. CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
+      // ==========================================================================
       const leftTrack = preloader.querySelector('.preloader__track--left') as HTMLElement;
       const rightTrack = preloader.querySelector('.preloader__track--right') as HTMLElement;
       const glassLeft = preloader.querySelector('.preloader__glass--left') as HTMLElement | null;
       const glassRight = preloader.querySelector('.preloader__glass--right') as HTMLElement | null;
+      const counterEl = document.getElementById('preloader-counter') as HTMLElement | null;
       const leftSlides = Array.from(leftTrack.querySelectorAll('.preloader__slide')) as HTMLElement[];
       const rightSlides = Array.from(rightTrack.querySelectorAll('.preloader__slide')) as HTMLElement[];
-
-      leftSlides.forEach((slide, i) => slide.style.top = `${i * 100}dvh`);
-      rightSlides.forEach((slide, i) => slide.style.top = `${-i * 100}dvh`);
 
       const slideCount = Math.max(leftSlides.length, rightSlides.length);
       const maxOffset = Math.max((slideCount - 1) * 100, 0);
       const glassMaxOffset = 100;
+      const PARALLAX_FACTOR = 1;
 
+      // Tempos e Motores
       const START_DELAY = 600;
       const LERP = 0.08;
-      const CLAMPED_STEP = 0.0030; 
+      const CLAMPED_STEP = 0.0025; // Define o tempo base de translação
+      const EASE_STYLE = 'cubic';
+      
+      // Controle de Retenção (Hang Time)
+      const HANG_TIME_MS = 250; // Tempo de tela congelada por foto
+      let lastHangTimestamp = 0;
+      let isHanging = false;
+      let isExiting = false;
 
+      // Estado da Linha do Tempo
       let phase = 0;            
       let phaseProgress = 0;    
       let delayElapsed = false;
+      let networkProgress = 0;
+      let rafId: number;
 
-      // BLINDAGEM 2: Timeout de Segurança Absoluta (Se a rede travar por 8s, força a saída)
+      // Configuração Espacial Inicial
+      leftSlides.forEach((slide, i) => slide.style.top = `${i * 100}dvh`);
+      rightSlides.forEach((slide, i) => slide.style.top = `${-i * 100}dvh`);
+
+      // ==========================================================================
+      // 3. MOTOR FÍSICO (EASING)
+      // ==========================================================================
+      const getEaseInOut = (t: number, style: string) => {
+        if (style === 'cubic') {
+          return t < 0.5 
+            ? 4 * t * t * t 
+            : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+        if (style === 'expo') {
+          if (t === 0) return 0;
+          if (t === 1) return 1;
+          return t < 0.5 
+            ? Math.pow(2, 20 * t - 10) / 2 
+            : (2 - Math.pow(2, -20 * t + 10)) / 2;
+        }
+        return t; 
+      };
+
+      // ==========================================================================
+      // 4. RASTREADOR DE REDE (NETWORK TRACKER)
+      // ==========================================================================
       const safetyTimeout = setTimeout(() => {
         if (networkProgress < 1) networkProgress = 1;
-      }, 8000);
+      }, 15000);
 
-      // BLINDAGEM 3: Rastreador de Rede Real para Produção
       const initNetworkTracker = () => {
-        const images = Array.from(preloader.querySelectorAll('img'));
+        const images = Array.from(leftTrack.querySelectorAll('img'));
         const totalImages = images.length;
         let loadedCount = 0;
 
@@ -186,55 +299,106 @@ const rightImages = [
               });
               img.addEventListener('error', () => {
                 loadedCount++;
-                networkProgress = loadedCount / totalImages; // Avança mesmo com erro para não travar a tela
+                networkProgress = loadedCount / totalImages; 
               });
             }
           });
         }
       };
+      
+      initNetworkTracker();
 
       const delayTimeout = setTimeout(() => {
         delayElapsed = true;
-        initNetworkTracker(); // A escuta de rede só começa a impactar a animação após o delay
+        initNetworkTracker(); 
       }, START_DELAY);
 
-      const render = () => {
+
+      // ==========================================================================
+      // 5. LOOP DE RENDERIZAÇÃO DOM (60FPS)
+      // ==========================================================================
+      const render = (timestamp: number) => {
+        
+        // --- 5.1. Atualização do Contador ---
+        if (counterEl) {
+          const globalPercent = phase === 0 
+            ? phaseProgress * 50 
+            : 50 + (phaseProgress * 50);
+          counterEl.innerText = `${Math.min(Math.round(globalPercent), 100)}%`;
+        }
+        
         if (!delayElapsed) {
           rafId = requestAnimationFrame(render);
           return;
         }
+
+        // --- 5.2. Relógio de Liberação (Hang Time) ---
+        if (isHanging) {
+          if (timestamp - lastHangTimestamp >= HANG_TIME_MS) {
+            isHanging = false; 
+          }
+        }
         
+        // --- 5.3. Avanço Quantizado de Tempo ---
         const speedMultiplier = phase === 0 ? Math.max((maxOffset / 100), 1) : 1;
         const currentLerp = LERP * speedMultiplier;
         const currentClamp = CLAMPED_STEP * speedMultiplier;
 
-        const distance = networkProgress - phaseProgress; // BLINDAGEM 4: Reconectado à variável de rede real
+        const distance = networkProgress - phaseProgress; 
         const baseStep = distance * currentLerp;
         const step = Math.min(baseStep, currentClamp);
-        // Só avança se o step for positivo (impede recuo se a rede atrasar)
-        if (step > 0) {
+        
+        if (step > 0 && !isHanging) {
+          const steps = slideCount - 1; 
+          const previousProgress = phaseProgress; 
+          
           phaseProgress = Math.min(phaseProgress + step, 1);
+
+          if (phase === 1) {
+            const previousStep = Math.floor(previousProgress * steps);
+            const newStep = Math.floor(phaseProgress * steps);
+
+            if (newStep > previousStep && phaseProgress < 1) {
+              phaseProgress = newStep / steps; 
+              isHanging = true;                
+              lastHangTimestamp = timestamp;   
+            }
+          }
         }
 
+        // ==========================================================================
+        // 6. CÁLCULO E APLICAÇÃO DE TRANSFORM (CSS)
+        // ==========================================================================
+        
         // --- FASE 0: VIDRO ---
         if (phase === 0) {
-          const offset = phaseProgress * glassMaxOffset;
+          const eased = getEaseInOut(phaseProgress, EASE_STYLE)
+          const offset = eased * glassMaxOffset;   
+          
           if (glassLeft) glassLeft.style.transform = `translateY(-${offset}dvh)`;
           if (glassRight) glassRight.style.transform = `translateY(${offset}dvh)`;
 
-          if (phaseProgress > 0.999) {
-            phaseProgress = 1;
-          }
+          if (phaseProgress > 0.999) phaseProgress = 1;
 
           if (phaseProgress >= 1) {
             phase = 1;
             phaseProgress = 0; 
+            
+            isHanging = true;                
+            lastHangTimestamp = timestamp;
           }
         }
 
-        // --- FASE 1: IMAGENS ---
+        // --- FASE 1: ESTEIRA DE IMAGENS ---
         else if (phase === 1) {
-          const offset = phaseProgress * maxOffset;
+          const steps = slideCount - 1; 
+          const steppedProgress = phaseProgress * steps;
+          const currentStep = Math.floor(steppedProgress);
+          let fraction = steppedProgress - currentStep;
+
+          const easedFraction = getEaseInOut(fraction, EASE_STYLE);
+          const finalEasing = phaseProgress >= 1 ? 0 : easedFraction;
+          const offset = (currentStep + finalEasing) * 100;
 
           leftTrack.style.transform = `translateY(-${offset}dvh)`;
           rightTrack.style.transform = `translateY(${offset}dvh)`;
@@ -244,42 +408,52 @@ const rightImages = [
             const img = slide.querySelector('img') as HTMLElement;
             img.style.transform = `translateY(${-absoluteY * PARALLAX_FACTOR}dvh) scale(1.1)`;
           });
+          
           rightSlides.forEach((slide, i) => {
             const absoluteY = (-i * 100) + offset;
             const img = slide.querySelector('img') as HTMLElement;
             img.style.transform = `translateY(${-absoluteY * PARALLAX_FACTOR}dvh) scale(1.1)`;
           });
             
-          if (phaseProgress > 0.999) {
-            phaseProgress = 1;
-          }
+          if (phaseProgress > 0.999) phaseProgress = 1;
           
+          // --- FASE 2: SAÍDA ---
           if (phaseProgress >= 1 && networkProgress >= 1) {
-            phase = 2;
-            leftTrack.style.transform = `translateY(-${maxOffset}dvh)`;
-            rightTrack.style.transform = `translateY(${maxOffset}dvh)`;
-            if (glassLeft) glassLeft.style.transform = `translateY(-${glassMaxOffset}dvh)`;
-            if (glassRight) glassRight.style.transform = `translateY(${glassMaxOffset}dvh)`;
+            
+            if (!isExiting) {
+              isExiting = true;
+              
+              setTimeout(() => { 
+                phase = 2;
+                leftTrack.style.transform = `translateY(-${maxOffset}dvh)`;
+                rightTrack.style.transform = `translateY(${maxOffset}dvh)`;
+                if (glassLeft) glassLeft.style.transform = `translateY(-${glassMaxOffset}dvh)`;
+                if (glassRight) glassRight.style.transform = `translateY(${glassMaxOffset}dvh)`;
 
-            if (!DEBUG) {
-              preloader.style.setProperty('--progress', '1');
-              document.documentElement.classList.add('is-preloader-disabled');
-              
-              // BLINDAGEM 5: Previne dupla execução do evento "preloaderComplete"
-              let isRemoved = false;
-              const removePreloader = () => {
-                if (isRemoved) return;
-                isRemoved = true;
-                clearTimeout(safetyTimeout);
-                preloader.remove();
-                document.documentElement.style.overflow = '';
-                window.dispatchEvent(new Event('preloaderComplete'));
-              };
-              
-              preloader.addEventListener('transitionend', removePreloader, { once: true });
-              setTimeout(removePreloader, 1500);
+                if (!DEBUG) {
+                  preloader.style.setProperty('--progress', '1');
+                  document.documentElement.classList.add('is-preloader-disabled');
+                  
+                  let isRemoved = false;
+                  const removePreloader = () => {
+                    if (isRemoved) return;
+                    isRemoved = true;
+                    clearTimeout(safetyTimeout);
+                    clearTimeout(delayTimeout);
+                    preloader.remove();
+                    document.documentElement.style.overflow = '';
+                    window.dispatchEvent(new Event('preloaderComplete'));
+                  };
+                  
+                  preloader.addEventListener('transitionend', removePreloader, { once: true });
+                  setTimeout(removePreloader, 1500);
+                }
+                
+                cancelAnimationFrame(rafId);
+              }, 250); // Hang time da última foto
             }
-            cancelAnimationFrame(rafId);
+            
+            rafId = requestAnimationFrame(render);
             return;
           }
         }
@@ -287,9 +461,11 @@ const rightImages = [
         rafId = requestAnimationFrame(render);
       };
 
+      // Inicia o motor
       rafId = requestAnimationFrame(render);
     }
   } else {
+    // Fallback: Preloader já visto
     document.getElementById('preloader')?.remove();
     document.documentElement.classList.add('is-preloader-disabled');
     requestAnimationFrame(() => window.dispatchEvent(new Event('preloaderComplete')));

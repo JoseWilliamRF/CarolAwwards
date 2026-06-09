@@ -1,49 +1,128 @@
 ---
 // src/components/Hero.astro
 
-const imagesTopBot = [
-  { src: '../../public/imagens/ensaios/ensaios1.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/ensaios/ensaios2.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/ensaios/ensaios3.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/ensaios/ensaios4.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/ensaios/ensaios5.jpg', ratio: '3/4' }
+import { client } from '../lib/prismic';
+
+
+const optimizeImg = (url: string | undefined) => {
+  if (!url) return '';
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}auto=format,compress&w=800&q=80`;
+};
+
+
+const [homeData, settingsData] = await Promise.all([
+  client.getSingle('home').catch(() => null),
+  client.getSingle('settings').catch(() => null),
+]);
+
+
+
+// Fallbacks completos para imagens (5 cada, para o efeito de esteira)
+const defaultTopBot = [
+  { src: '/imagens/ensaios/ensaios1.jpg', ratio: '3/4' },
+  { src: '/imagens/ensaios/ensaios2.jpg', ratio: '3/4' },
+  { src: '/imagens/ensaios/ensaios3.jpg', ratio: '3/4' },
+  { src: '/imagens/ensaios/ensaios4.jpg', ratio: '3/4' },
+  { src: '/imagens/ensaios/ensaios5.jpg', ratio: '3/4' },
+];
+const defaultMid = [
+  { src: '/imagens/ensaios/ensaios6.jpg', ratio: '3/4' },
+  { src: '/imagens/significados/momentos1.jpg', ratio: '3/4' },
+  { src: '/imagens/significados/momentos2.jpg', ratio: '3/4' },
+  { src: '/imagens/significados/momentos3.jpg', ratio: '3/4' },
+  { src: '/imagens/significados/momentos4.jpg', ratio: '3/4' },
 ];
 
-const imagesMid = [
-  { src: '../../public/imagens/ensaios/ensaios6.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/significados/momentos1.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/significados/momentos2.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/significados/momentos3.jpg', ratio: '3/4' },
-  { src: '../../public/imagens/significados/momentos4.jpg', ratio: '3/4' }
-];
+
+// Logo: prioriza 'logo_nome' do settings, fallback para o SVG local
+const logoUrl = settingsData?.data.logo_nome?.url || '/logo-nome.svg';
+const logoAlt = settingsData?.data.site_title || 'Carolina Alves';
+
+
+// Subtítulo: do 'home', com fallback (quebra de linha com \n no Prismic)
+const subtitle = homeData?.data?.hero_subtitle
+  ? String(homeData.data.hero_subtitle)
+  : 'Há 14 anos revelando a essência e a força feminina\nem Campo Grande. Um espaço de acolhimento para\nvocê se ver por inteiro e ressignificar sua história.';
+  
+// Imagens: extrai dos grupos do 'home', garante pelo menos 5 itens repetindo a última
+let imagesTopBot = defaultTopBot;
+let imagesMid = defaultMid;
+
+
+const topBotPrismic = homeData?.data?.track_top_bot;
+const midPrismic = homeData?.data?.track_mid;
+
+if (topBotPrismic && topBotPrismic.length > 0) {
+  const prismicTopBot = topBotPrismic.map((item: any) => ({
+    src: optimizeImg(item.image?.url),
+    ratio: '3/4',
+  }));
+  while (prismicTopBot.length < 5) {
+    prismicTopBot.push({ ...prismicTopBot[prismicTopBot.length - 1] });
+  }
+  imagesTopBot = prismicTopBot.slice(0, 15); // triplica depois
+}
+
+if (midPrismic && midPrismic.length > 0) {
+  const prismicMid = midPrismic.map((item: any) => ({
+    src: optimizeImg(item.image?.url),
+    ratio: '3/4',
+  }));
+  while (prismicMid.length < 5) {
+    prismicMid.push({ ...prismicMid[prismicMid.length - 1] });
+  }
+  imagesMid = prismicMid.slice(0, 15);
+}
 
 const trackTopBot = [...imagesTopBot, ...imagesTopBot, ...imagesTopBot];
 const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
+
+
 ---
 
-<section class="hero section" id="hero" >
-  <div class="hero__grid-wrapper" >
+
+<section class="hero section" id="hero">
+  <div class="hero__grid-wrapper">
     
     <div class="hero__track track-left track-small">
-      {trackTopBot.map((item,index) => (
+      {trackTopBot.map((item, index) => (
         <div class="hero__item" style={`aspect-ratio: ${item.ratio};`}>
-          <img src={item.src} alt="" loading={index < 5 ? "eager" : "lazy"} draggable="false" />
+          <img
+              src={item.src}
+              alt=""
+              loading={index < 2 ? "eager" : "lazy"}
+              decoding="async" 
+              draggable="false"
+            />
         </div>
       ))}
     </div>
 
     <div class="hero__track track-right track-large">
-      {trackMid.map((item,index) => (
+      {trackMid.map((item, index) => (
         <div class="hero__item" style={`aspect-ratio: ${item.ratio};`}>
-          <img src={item.src} alt="" loading={index < 5 ? "eager" : "lazy"} draggable="false" />
+          <img
+              src={item.src}
+              alt=""
+              loading={index < 2 ? "eager" : "lazy"}
+              decoding="async" 
+              draggable="false"
+            />
         </div>
       ))}
     </div>
 
     <div class="hero__track track-left track-small">
-      {trackTopBot.map((item,index) => (
+      {trackTopBot.map((item, index) => (
         <div class="hero__item" style={`aspect-ratio: ${item.ratio};`}>
-          <img src={item.src} alt="" loading={index < 5 ? "eager" : "lazy"} draggable="false" />
+          <img
+              src={item.src}
+              alt=""
+              loading={index < 2 ? "eager" : "lazy"}
+              decoding="async" 
+              draggable="false"
+            />
         </div>
       ))}
     </div>
@@ -51,16 +130,16 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
   </div>
 
   <div class="hero__overlay"></div>
-<div class="hero__content">
-  <h1 class="hero__title">
-    <img 
-      src="/logo-nome.svg" 
-      alt="Carolina Alves" 
-      class="hero__title-svg"
-    />
-  </h1>
-  <p class="hero__subtitle">Há 14 anos revelando a essência e a força feminina<br> em Campo Grande. Um espaço de acolhimento para<br> você se ver por inteiro e ressignificar sua história.</p>
-</div>
+  <div class="hero__content">
+    <h1 class="hero__title">
+      <img 
+        src={logoUrl} 
+        alt={logoAlt} 
+        class="hero__title-svg"
+      />
+    </h1>
+    <p class="hero__subtitle" style="white-space: pre-line;">{subtitle}</p>
+  </div>
 </section>
 
 
