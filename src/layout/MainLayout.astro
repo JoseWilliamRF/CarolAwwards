@@ -63,6 +63,114 @@ const ogImage = settings?.data.og_image?.url;
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <style is:inline>
+      body { 
+        background-color: var(--color-overlay, #080D0B); 
+        margin: 0; 
+      }
+      
+      .preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background-color: var(--color-overlay, #080D0B);
+        display: flex;
+        touch-action: none;
+        transition: opacity 0.8s ease-out;
+        will-change: opacity;
+      }
+
+      html.is-preloader-disabled .preloader {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* ========================================================== */
+      /* MOTORES DE ANIMAÇÃO                                        */
+      /* ========================================================== */
+      @keyframes glassBreathe {
+        0%, 100% { 
+          background: rgba(255, 255, 255, 0.02); 
+          backdrop-filter: blur(15px); 
+        }
+        50% { 
+          background: rgba(255, 255, 255, 0.06); 
+          backdrop-filter: blur(25px); 
+        }
+      }
+      
+      @keyframes logoPulse {
+        0%, 100% { opacity: 0.6; transform: scale(0.98); }
+        50% { opacity: 1; transform: scale(1.02); }
+      }
+
+      /* Motor do Skeleton Cromado */
+      @keyframes gradientShift {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 100% 100%; }
+      }
+
+      /* ========================================================== */
+      /* ESTRUTURAS VISUAIS DO FRAME ZERO                           */
+      /* ========================================================== */
+      
+      /* O Skeleton: Fundo dinâmico que mascara o atraso de rede */
+      .preloader__slide {
+        position: absolute;
+        width: 100%;
+        height: 100dvh;
+        overflow: hidden; 
+        background: linear-gradient(
+          135deg,
+          #1a1a1a 0%,
+          #3d3d3d 20%,
+          #6b6b6b 40%,
+          #8c8c8c 55%,
+          #6b6b6b 70%,
+          #3d3d3d 85%,
+          #1a1a1a 100%
+        );
+        background-size: 300% 300%;
+        animation: gradientShift 4s ease-in-out infinite alternate;
+      }
+
+      /* O Vidro Esfumaçado */
+      .preloader__glass {
+        position: absolute;
+        top: 0;
+        width: 50%;
+        height: 100dvh;
+        z-index: 5;
+        will-change: transform, background, backdrop-filter;
+        animation: glassBreathe 4s ease-in-out infinite; 
+      }
+      
+      /* Micro-bordas para dar o efeito de espessura de vidro contra o fundo preto */
+      .preloader__glass--left { 
+        left: 0; 
+        border-right: 1px solid rgba(255, 255, 255, 0.03);
+      }
+      .preloader__glass--right { 
+        right: 0; 
+        border-left: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      .preloader__logo {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        width: 40vw;
+        max-width: 400px;
+        height: fit-content;
+        margin: auto;
+        animation: logoPulse 4s ease-in-out infinite;
+      }
+
+      @media (max-width: 768px) {
+        .preloader__glass--right { display: none !important; }
+        .preloader__glass--left { width: 100% !important; border-right: none; }
+      }
+    </style>
   </head>
 
   <body>

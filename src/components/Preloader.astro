@@ -45,10 +45,9 @@ const logoAlt = settingsData?.data.site_title || 'Carolina Alves';
 let leftImages = defaultLeft;
 let rightImages = defaultRight;
 
-
-
 const leftPrismic = preloaderData?.data?.left_track;
 const rightPrismic = preloaderData?.data?.right_track;
+
 
 
 if (leftPrismic && leftPrismic.length > 0) {
@@ -82,7 +81,7 @@ if (rightPrismic && rightPrismic.length > 0) {
 
   <div class="preloader__track preloader__track--right">
     {rightImages.map((src) => (<div class="preloader__slide">
-        <img src={src} alt="" loading="lazy" decoding="async" />
+        <img src={src} alt="" loading="eager" fetchpriority="high" />
       </div>
     ))}
   </div>
@@ -95,99 +94,66 @@ if (rightPrismic && rightPrismic.length > 0) {
 </div>
 
 <style>
-  .preloader {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background-color: var(--color-overlay, #080D0B);
-    touch-action: none;
-    transition: opacity 0.8s ease-out;
-    display: flex;
-    will-change: opacity;
-  }
-
-  html.is-preloader-disabled .preloader {
-    opacity: 0;
-    pointer-events: none;
-  }
-
   .preloader__track {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100dvh;
-    will-change: transform;
-  }
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100dvh;
+  will-change: transform;
+}
+.preloader__track--left { left: 0; }
+.preloader__track--right { right: 0; }
 
-  .preloader__track--left { left: 0; }
-  .preloader__track--right { right: 0; }
-
-  .preloader__slide {
+.preloader__slide {
     position: absolute;
     width: 100%;
     height: 100dvh;
     overflow: hidden; 
-  }
-  
-  .preloader__glass {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100dvh;
-    backdrop-filter: blur(15px);
-    background: rgba(255, 255, 255, 0.05);
-    will-change: transform;
-    z-index: 5;
-  }
-  .preloader__glass--left { left: 0; }
-  .preloader__glass--right { right: 0; }
-
-  .preloader__slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.4;
-    filter: grayscale(100%);
-    will-change: transform;
-    transform: scale(1.1); 
+    background: linear-gradient(
+      135deg,
+      #1a1a1a 0%,
+      #3d3d3d 20%,
+      #6b6b6b 40%,
+      #8c8c8c 55%,
+      #6b6b6b 70%,
+      #3d3d3d 85%,
+      #1a1a1a 100%
+    );
+    background-size: 300% 300%;
+    animation: gradientShift 4s ease-in-out infinite alternate;
   }
 
-  .preloader__logo {
-    position: absolute;
-    inset: 0;
-    z-index: 10;
-    width: 40vw;
-    max-width: 400px;
-    height: fit-content;
-    margin: auto;
-  }
-  
-  .preloader__counter {
-    position: absolute;
-    bottom: 5vh;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    color: var(--c-beige-background, #f5e8d1);
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    font-variant-numeric: tabular-nums;
-  }
+.preloader__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  filter: grayscale(100%);
+  will-change: transform;
+  transform: scale(1.1); 
+}
 
-  @media (max-width: 768px) {
-    /* 1. Mata o lado direito (esteira e vidro) da árvore de pintura do navegador */
-    .preloader__track--right, 
-    .preloader__glass--right {
-      display: none !important;
-    }
+.preloader__counter {
+  position: absolute;
+  bottom: 5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  color: var(--c-beige-background, #f5e8d1);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
 
-    /* 2. Expande o lado esquerdo (esteira e vidro) para cobrir o celular inteiro */
-    .preloader__track--left, 
-    .preloader__glass--left {
-      width: 100% !important;
-      }
-    }
+@media (max-width: 768px) {
+  .preloader__track--right {
+    display: none !important;
+  }
+  .preloader__track--left {
+    width: 100% !important;
+  }
+}
   
 </style>
 
