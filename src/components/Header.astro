@@ -85,14 +85,19 @@
   width: 100%;
   height: 100%;
   
-  /* A FÓRMULA SPRINGS EXTRAÍDA DO DEVTOOLS */
-  background: transparent;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  
-  /* Substituímos o bege deles pelo seu branco suave a 15% de opacidade */
-  box-shadow: 0 0 0 1px rgba(244, 244, 244, 0.15); 
-  
+  /* Aquoso: gradiente sutil + saturate + brightness */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  backdrop-filter: blur(4px) saturate(140%) brightness(1.02);
+  -webkit-backdrop-filter: blur(4px) saturate(140%) brightness(1.02);
+  box-shadow:
+    0 0 0 1px rgba(244, 244, 244, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
   /* Mantém as âncoras para a animação do GSAP */
   transform: scaleY(0);
   transform-origin: top;
@@ -497,6 +502,31 @@ const tl = gsap.timeline({
         }
       });
     });
+    
+    // ========================================
+    // TRANSIÇÃO DE COR DO HEADER (Hero → Pacotes)
+    // ========================================
+    const lenis = (window as any).lenisInstance;
+    if (lenis) {
+      const heroHeight = window.innerHeight;
+      const startTransition = heroHeight * 0.7;
+      const endTransition = heroHeight + window.innerHeight * 0.3;
+
+      const light = { r: 244, g: 244, b: 244 };
+      const dark  = { r: 13,  g: 13,  b: 13  };
+
+      lenis.on('scroll', ({ scroll }: { scroll: number }) => {
+        const raw = (scroll - startTransition) / (endTransition - startTransition);
+        const t = Math.min(1, Math.max(0, raw));
+
+        const r = Math.round(light.r + (dark.r - light.r) * t);
+        const g = Math.round(light.g + (dark.g - light.g) * t);
+        const b = Math.round(light.b + (dark.b - light.b) * t);
+
+        document.documentElement.style.setProperty('--header-text-color', `rgb(${r},${g},${b})`);
+        document.documentElement.style.setProperty('--color-text', `rgb(${r},${g},${b})`);
+      });
+    }
     
     });
   </script>
