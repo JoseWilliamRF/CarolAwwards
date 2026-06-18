@@ -1,0 +1,102 @@
+---
+// src/components/historia.astro
+---
+
+<!-- A classe "section" é obrigatória para o motor de Snap (Bloco 3) reconhecer esta tela -->
+<section class="historia section" id="historia">
+  <div class="historia__container">
+    
+    <div class="historia__quadros">
+      <div class="quadro-preto"></div>
+      <div class="quadro-preto"></div>
+      <div class="quadro-preto"></div>
+    </div>
+
+    <div class="historia__foto-lado">
+      <!-- Placeholder para a foto da Carol -->
+      <div class="foto-placeholder">Foto Editorial</div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* A FÍSICA DA CORTINA */
+  .historia {
+    position: relative; /* Libera o movimento sobre o Hero (que é sticky) */
+    z-index: 4;         /* Passa por cima do Hero (que é 1) */
+    width: 100vw;
+    min-height: 100dvh; /* Ocupa a tela inteira */
+    background-color: #ff0000; /* Cor sólida clara da sua referência. IMPEDE O VAZAMENTO DO HERO. */
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .historia__container {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    width: 100%;
+    padding: 0 5%;
+    gap: 2rem;
+  }
+
+  .historia__quadros {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .quadro-preto {
+    width: 100%;
+    max-width: 250px;
+    aspect-ratio: 3/4;
+    background-color: #080D0B; /* Preto sólido */
+  }
+
+  .historia__foto-lado {
+    display: flex;
+    justify-content: flex-end;
+    height: 70vh;
+  }
+
+  .foto-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+  }
+</style>
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const pacotes = document.querySelector('#pacotes');
+    const historia = document.querySelector('#historia');
+
+    if (pacotes && historia) {
+
+
+      gsap.fromTo(pacotes, 
+        { y: 0 }, 
+        {
+          // Usa window.innerHeight diretamente para garantir que a seção seja empurrada 100% para fora da tela.
+          y: () => window.innerHeight, 
+          ease: "none",                 // CRÍTICO: Zero curva de suavização. Movimento 1:1 com a roda do mouse.
+          scrollTrigger: {
+            trigger: historia,
+            start: "top bottom",        // O motor arma quando o topo da História vermelha encosta no fundo do monitor do usuário.
+            end: "top top",             // O motor desarma quando a História dominou a viewport inteira.
+            scrub: true                 // Amarra a animação diretamente à roda do mouse (sincronia perfeita com o Lenis).
+          }
+        }
+      );
+    }
+  });
+</script>

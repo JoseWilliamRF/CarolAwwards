@@ -8,7 +8,7 @@ import { client } from '../lib/prismic';
 const optimizeImg = (url: string | undefined) => {
   if (!url) return '';
   const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}auto=format,compress&w=800&q=80`;
+  return `${url}${separator}auto=format,compress&w=800&q=90`;
 };
 
 
@@ -431,7 +431,6 @@ if (rightPrismic && rightPrismic.length > 0) {
       rafId = requestAnimationFrame(render);
     }
   } else {
-    // Fallback: Preloader já visto
     document.getElementById('preloader')?.remove();
     document.documentElement.classList.add('is-preloader-disabled');
     requestAnimationFrame(() => window.dispatchEvent(new Event('preloaderComplete')));
