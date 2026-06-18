@@ -1,0 +1,543 @@
+---
+// src/components/Pacotes.astro
+import { client } from '../lib/prismic';
+
+const optimizeImg = (url: string | undefined) => {
+  if (!url) return '';
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}auto=format,compress&w=600&q=80`;
+};
+
+// 1. O CONTRATO DE TIPAGEM (Strict Mode)
+interface Pacote {
+  images: { src: string; alt: string }[];
+  title: string;
+}
+
+// 2. A MUDANÇA ARQUITETURAL: Buscar múltiplos documentos do tipo 'portifolio'
+// NOTA: Se o API ID do teu custom type não for exatamente 'portifolio', altera aqui.
+const portifolioDocs = await client.getAllByType('portfolio').catch(() => []);
+
+// 3. MAPEAR OS DOCUMENTOS PARA OS CARDS (todas as imagens)
+const pacotesList: Pacote[] = portifolioDocs.slice(0, 3).map((doc: any) => {
+  const images = (doc.data.images || []).map((img: any) => ({
+    src: optimizeImg(img.gallery_image?.url) || 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=600&auto=format&fit=crop',
+    alt: img.gallery_image?.alt || doc.data.category_title || 'Imagem de portfólio',
+  }));
+  
+  return {
+    images: images.length > 0 ? images : [{ 
+      src: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=600&auto=format&fit=crop', 
+      alt: 'Placeholder' 
+    }],
+    title: doc.data.category_title || `Pacote`, 
+  };
+});
+
+// 4. FALLBACK DE SEGURANÇA
+while (pacotesList.length < 3) {
+  pacotesList.push({ 
+    images: [{ src: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=600&auto=format&fit=crop', alt: 'Em breve' }],
+    title: 'Em breve' 
+  });
+}
+---
+
+<section class="pacotes section" id="pacotes">
+  <div class="pacotes__container">
+    
+    <div class="pacotes__content">
+      <h2 class="pacotes__title">Portfolio</h2>
+      
+      <div class="pacotes__grid">
+        {pacotesList.map((pacote, i) => (
+          <div class="pacotes__item">
+            <div 
+              class="card" 
+              data-card-gallery={JSON.stringify(pacote.images)}
+              data-card-index="0"
+              data-card-title={pacote.title}
+              data-category={pacote.title}
+            >
+              <img 
+                src={pacote.images[0].src} 
+                alt={pacote.images[0].alt} 
+                class="card__img"
+                loading="lazy"
+                decoding="async"
+              />
+              <img 
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" 
+                alt="" 
+                class="card__img card__img--next"
+              />
+              <button class="card__arrow card__arrow--left" aria-label="Imagem anterior">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              </button>
+              <button class="card__arrow card__arrow--right" aria-label="Próxima imagem">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+              </button>
+              <div class="card__border">
+                
+                <div class="card__icons">
+                  <a href="https://www.instagram.com/carolinaalvesfoto/" target="_blank" rel="noopener noreferrer" class="card__icon-link" aria-label="Instagram">
+                    <svg class="card__icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                    </svg>
+                  </a>
+                  <a href="https://www.facebook.com/carolinalvesfoto/" target="_blank" rel="noopener noreferrer" class="card__icon-link" aria-label="Facebook">
+                    <svg class="card__icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </a>
+                  <a href="https://www.linkedin.com/in/carolinaalvesfoto/" target="_blank" rel="noopener noreferrer" class="card__icon-link" aria-label="LinkedIn">
+                    <svg class="card__icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <p class="pacotes__label">{pacote.title}</p>
+          </div>
+        ))}
+      </div>
+
+      <a href="https://wa.me/5567992890225?text=Vim%20pelo%20site!%20Gostaria%20de%20saber%20mais%20sobre%20os%20pacotes" class="pacotes__btn" target="_blank" rel="noopener noreferrer" id="pacotes-btn">
+        RESERVAR MOMENTO
+      </a>
+    </div>
+
+  </div>
+  <style>
+  /* 1. O FUNDO PURO (Sem película escura) */
+  .pacotes {
+    position: relative; 
+    z-index: 2;        
+    width: 100vw;
+    min-height: 100dvh; 
+    
+    background: url('/foto-background.jpg') center/cover no-repeat #080D0B;
+    background-attachment: fixed;
+    
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .pacotes__container {
+    width: 100%;
+    max-width: 1600px; /* Ajuste conforme a largura máxima desejada para o conteúdo */
+    margin: 0 auto;
+    padding: 10vh 5%;
+    
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2 partes para conteúdo, 1 parte para o espaço da modelo */
+    gap: 4rem;
+  }
+
+  /* 3. A ÁREA DE CONTEÚDO (Esquerda) */
+  .pacotes__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 3rem;
+  }
+
+  .pacotes__title {
+    font-size: clamp(2rem, 3vw, 3rem);
+    color: var(--pacotes-text-color, #0D0D0D);
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    margin-top: 3rem
+  }
+
+  /* 4. A GRELHA DOS PACOTES (Os 3 quadros alinhados) */
+  .pacotes__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    width: 100%;
+  }
+
+  .pacotes__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .pacotes__label {
+    color: var(--pacotes-text-color, #0D0D0D);
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+  }
+
+  .pacotes__label:hover {
+    opacity: 1;
+  }
+
+  /* 5. O BOTÃO WHATSAPP — Glassmorphism */
+  .pacotes__btn {
+    padding: 1rem 4rem;
+    border: none;
+    color: var(--pacotes-text-color, #0D0D0D);
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+    
+    align-self: flex-start; 
+    margin-left: 2%;
+
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(255, 255, 255, 0.04) 100%);
+    backdrop-filter: blur(4px) saturate(140%) brightness(1.02);
+    -webkit-backdrop-filter: blur(4px) saturate(140%) brightness(1.02);
+    box-shadow: 0 0 0 1px rgba(244, 244, 244, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+  }
+
+  .pacotes__btn:hover {
+    transform: scale(1.02);
+    background: #ffffff;
+    color: #080D0B;
+  }
+
+/* 5. A FÍSICA DOS CARDS (Fidelidade Absoluta ao CodePen) */
+  .card {
+    height: 379px;
+    width: 100%;
+    max-width: 300px;
+    background-color: black;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 70px 63px -60px #000000;
+    margin: 0 auto;
+    cursor: pointer;
+  }
+  
+  .card__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform-origin: left center; 
+    transition: opacity 0.6s ease, transform 0.8s ease;
+  }
+
+  .card__img--next {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .card:hover .card__img {
+   transform: scale(1.3) translateX(-10px);
+    object-position: left center;
+  }
+
+  /* ═══ ATENÇÃO FOCADA: Estado de interação ═══ */
+  .pacotes__grid.has-interaction .card {
+    opacity: 0.7;
+    filter: grayscale(100%);
+    transform: scale(0.98);
+    transition: opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease;
+  }
+
+  .pacotes__grid.has-interaction .card.is-focused {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1.05);
+    border: 1px solid white;
+  }
+
+  .pacotes__grid.has-interaction .card.is-focused .card__inner-title,
+  .pacotes__grid.has-interaction .card.is-focused .card__icons {
+    opacity: 1;
+  }
+
+  .card__border {
+    position: absolute;
+    inset: 5px; /* Exatos 5px de margem (300px - 290px / 2) do CodePen */
+    background: transparent;
+    border-radius: 10px;
+    transition: border 1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+  }
+
+  .card:hover .card__border {
+    border: 1px solid white;
+  }
+
+  .card__inner-title {
+    font-family: var(--font-sans);
+    color: white;
+    margin: 20px;
+    opacity: 0;
+    transition: opacity 1s;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .card__icons {
+    position: absolute;
+    left: 1px;
+    fill: #fff;
+    color: #fff;
+    height: 130px;
+    top: 226px;
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+
+  .card__icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .card__icon-link {
+    display: flex;
+    color: inherit;
+    transition: opacity 0.3s ease;
+  }
+
+  .card__icon-link:hover {
+    opacity: 0.7;
+  }
+
+  /* SETAS DE NAVEGAÇÃO */
+  .card__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    opacity: 0.25;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card__arrow svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .card__arrow--left  { left: 8px; }
+  .card__arrow--right { right: 8px; }
+
+  .card:hover .card__arrow {
+    opacity: 1;
+  }
+
+  .card:hover .card__inner-title,
+  .card:hover .card__icons {
+    opacity: 1;
+  }
+
+  /* MOBILE: setas maiores + ícones sempre visíveis */
+  @media (max-width: 768px), (hover: none) {
+    .card__arrow {
+      width: 44px;
+      height: 44px;
+      opacity: 0.45;
+    }
+    .card__arrow--left  { left: 4px; }
+    .card__arrow--right { right: 4px; }
+    .card__icons {
+      opacity: 0.85;
+    }
+  }
+  /* 7. MEDIA QUERIES (Responsividade) */
+  @media (max-width: 1024px) {
+    .pacotes__container {
+      /* Remove o espaço da modelo (coluna da direita) em telas menores */
+      grid-template-columns: 1fr; 
+      padding: 15vh 5%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .pacotes__grid {
+      grid-template-columns: 1fr; /* Empilha os quadros */
+    }
+    .card {
+      max-width: 350px; 
+      margin: 0 auto;
+    }
+    .pacotes__btn {
+      align-self: center; /* Centraliza o botão no celular */
+      margin-left: 0;
+    }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.querySelector('.pacotes__grid');
+    const items = gsap.utils.toArray('.pacotes__item');
+
+    if (!grid || items.length === 0) return;
+
+    ScrollTrigger.getAll()
+      .filter(st => st.trigger === grid || st.vars.trigger === grid)
+      .forEach(st => st.kill());
+
+    const ease = 'cubic-bezier(0.19, 1, 0.22, 1)';
+
+    console.log('%c[PACOTES] ease: ' + ease, 'color: #00ff88;');
+
+    gsap.from(items, {
+      x: -250,
+      scale: 0.88,
+      opacity: 0,
+      duration: 1.5,
+      stagger: {
+        each: 0.8,
+        from: 'start',
+      },
+      ease,
+      scrollTrigger: {
+        trigger: grid,
+        start: 'top 82%',
+        end: 'top 30%',
+        scrub: 1,
+      },
+    });
+    
+    // ============================================
+    // STATE MANAGER — Lock (click) ≠ Preview (hover)
+    // ============================================
+    const btn = document.getElementById('pacotes-btn') as HTMLAnchorElement | null;
+    const allCards = document.querySelectorAll('.card');
+    const defaultBtnText = 'RESERVAR MOMENTO';
+    const defaultZapLink = 'https://wa.me/5567992890225?text=Vim%20pelo%20site!%20Gostaria%20de%20saber%20mais%20sobre%20os%20pacotes';
+    let lockedCard: Element | null = null;
+
+    const updateButton = (card: Element | null) => {
+      if (!btn) return;
+      if (!card) {
+        btn.textContent = defaultBtnText;
+        btn.href = defaultZapLink;
+        return;
+      }
+      const category = (card as HTMLElement).dataset.category || 'MOMENTO';
+      btn.textContent = 'RESERVAR ' + category.toUpperCase();
+      btn.href = 'https://wa.me/5567992890225?text=' + encodeURIComponent('Olá! Vim pelo Site, gostaria de saber mais sobre ' + category);
+    };
+
+    const renderVisualState = (hoveredCard: Element | null) => {
+      const targetCard = hoveredCard || lockedCard;
+      allCards.forEach(c => c.classList.remove('is-focused'));
+      if (targetCard) {
+        grid.classList.add('has-interaction');
+        targetCard.classList.add('is-focused');
+        updateButton(targetCard);
+      } else {
+        grid.classList.remove('has-interaction');
+        updateButton(null);
+      }
+    };
+
+    if (allCards.length > 0 && btn) {
+      allCards.forEach(card => {
+        card.addEventListener('mouseenter', () => renderVisualState(card));
+        card.addEventListener('mouseleave', () => renderVisualState(null));
+        card.addEventListener('click', () => {
+          lockedCard = card;
+          renderVisualState(card);
+        });
+      });
+    }
+
+    // ============================================
+    // CARROSSEL — crossfade CSS puro
+    // ============================================
+    document.querySelectorAll('.card').forEach(card => {
+      const imgs = card.querySelectorAll('.card__img');
+      let imgActive = imgs[0] as HTMLImageElement;
+      let imgNext   = imgs[1] as HTMLImageElement;
+      const btnLeft = card.querySelector('.card__arrow--left') as HTMLElement | null;
+      const btnRight = card.querySelector('.card__arrow--right') as HTMLElement | null;
+
+      if (!btnLeft || !btnRight) return;
+
+      const gallery: { src: string; alt: string }[] = JSON.parse(
+        card.getAttribute('data-card-gallery') || '[]'
+      );
+      if (gallery.length <= 1) {
+        btnLeft.style.display = 'none';
+        btnRight.style.display = 'none';
+        return;
+      }
+
+      const preloadAdjacent = (idx: number) => {
+        const next = (idx + 1) % gallery.length;
+        const prev = (idx - 1 + gallery.length) % gallery.length;
+        new Image().src = gallery[next].src;
+        new Image().src = gallery[prev].src;
+      };
+      preloadAdjacent(0);
+
+      const slide = (dir: number) => {
+        let idx = parseInt(card.getAttribute('data-card-index') || '0') + dir;
+        if (idx < 0) idx = gallery.length - 1;
+        if (idx >= gallery.length) idx = 0;
+        card.setAttribute('data-card-index', String(idx));
+        const swap = () => {
+          imgActive.style.opacity = '0';
+          imgNext.style.opacity = '1';
+          const temp = imgActive;
+          imgActive = imgNext;
+          imgNext = temp;
+          imgNext.classList.add('card__img--next');
+          imgActive.classList.remove('card__img--next');
+          preloadAdjacent(idx);
+        };
+        imgNext.onload = () => { imgNext.onload = null; swap(); };
+        imgNext.src = gallery[idx].src;
+        imgNext.alt = gallery[idx].alt;
+        if (imgNext.complete) { imgNext.onload = null; swap(); }
+      };
+
+      btnLeft.addEventListener('click', (e) => { e.stopPropagation(); slide(-1); });
+      btnRight.addEventListener('click', (e) => { e.stopPropagation(); slide(1); });
+    });
+  });
+</script>
