@@ -59,14 +59,13 @@ export function initScrollEngine() {
   }
 
   // ============================================================
-  // BLOCO 3 – MOTOR DE SNAP PONTO A PONTO
+  // BLOCO 3 – MOTOR DE SNAP
   // ============================================================
   const pacotesSec = document.querySelector('#pacotes') as HTMLElement | null;
   const historiasSec = document.querySelector(
     '#historias',
   ) as HTMLElement | null;
 
-  // Se a seção Pacotes não existir, não há porque ligar os disjuntores
   if (!pacotesSec) return;
 
   console.log(
@@ -91,18 +90,13 @@ export function initScrollEngine() {
     const alpha = 0.5;
     smoothVelocity = alpha * velocity + (1 - alpha) * smoothVelocity;
 
-    const maxScroll = Math.max(
-      0,
-      document.documentElement.scrollHeight - window.innerHeight,
-    );
-
     // ====================================================================
     // DISJUNTOR 1: HERO <-> PACOTES
     // ====================================================================
     if (
       currentScroll > 0 &&
       currentScroll < pacotesSec!.offsetTop &&
-      velocity < 200 // ← era 80 (snap dispara mais cedo)
+      velocity < 200
     ) {
       if (snapArmed) {
         snapArmed = false;
@@ -131,13 +125,14 @@ export function initScrollEngine() {
       }
     }
     // ====================================================================
-    // DISJUNTOR 2: PACOTES <-> HISTÓRIAS
+    // DISJUNTOR 2: PACOTES <-> HISTÓRIAS (DESKTOP)
     // ====================================================================
     else if (
       historiasSec &&
+      window.innerWidth > 768 &&
       currentScroll > pacotesSec!.offsetTop &&
       currentScroll < historiasSec.offsetTop &&
-      velocity < 180
+      velocity < 300
     ) {
       if (snapArmed) {
         snapArmed = false;
@@ -158,8 +153,8 @@ export function initScrollEngine() {
 
         const distance = Math.abs(target - currentScroll);
         const dynamicDuration = Math.min(
-          Math.max(distance / (smoothVelocity || 1), 0.3),
-          0.8,
+          Math.max(distance / (smoothVelocity || 1), 0.5),
+          1.2,
         );
         lenis.scrollTo(target, {
           duration: dynamicDuration,
@@ -168,38 +163,35 @@ export function initScrollEngine() {
       }
     }
     // ====================================================================
-    // DISJUNTOR 3: ÚLTIMA SEÇÃO <-> FOOTER
+    // DISJUNTOR 2 MOBILE: encaixe suave nas bordas
     // ====================================================================
-    else {
-      const ultimaBase = historiasSec
-        ? historiasSec.offsetTop
-        : pacotesSec!.offsetTop;
+    else if (
+      historiasSec &&
+      window.innerWidth <= 768 &&
+      currentScroll > pacotesSec!.offsetTop &&
+      currentScroll < historiasSec.offsetTop &&
+      velocity < 80
+    ) {
+      if (snapArmed) {
+        const top = pacotesSec!.offsetTop;
+        const bottom = historiasSec.offsetTop;
+        const zone = bottom - top;
+        const edge = zone * 0.25;
 
-      if (
-        ultimaBase > 0 &&
-        currentScroll > ultimaBase &&
-        currentScroll < maxScroll &&
-        velocity < 180
-      ) {
-        if (snapArmed) {
+        const nearTop = currentScroll - top < edge;
+        const nearBottom = bottom - currentScroll < edge;
+
+        if (nearTop || nearBottom) {
           snapArmed = false;
-          const height = maxScroll - ultimaBase;
-
-          let direction: 'up' | 'down' =
-            currentScroll < ultimaBase + height * 0.48
-              ? 'up'
-              : currentScroll > ultimaBase + height * 0.52
-                ? 'down'
-                : lastDirection || 'up';
+          const direction: 'up' | 'down' = nearTop ? 'up' : 'down';
           lastDirection = direction;
-
-          const target = direction === 'up' ? ultimaBase : maxScroll;
-          console.log(`%c[CIRCUITO 3] Alvo: ${target}px`, 'color: #9b59b6;');
+          const target = direction === 'up' ? top : bottom;
+          console.log(`%c[CIRCUITO 2📱] Alvo: ${target}px`, 'color: #e67e22;');
 
           const distance = Math.abs(target - currentScroll);
           const dynamicDuration = Math.min(
-            Math.max(distance / (smoothVelocity || 1), 0.6),
-            1.3,
+            Math.max(distance / (smoothVelocity || 1), 0.25),
+            0.6,
           );
           lenis.scrollTo(target, {
             duration: dynamicDuration,
@@ -207,10 +199,12 @@ export function initScrollEngine() {
           });
         }
       }
-      // REARME
-      else if (velocity >= 100) {
-        snapArmed = true;
-      }
+    }
+    // ====================================================================
+    // REARME DO MOTOR APÓS A ZONA DE GRAVIDADE
+    // ====================================================================
+    else if (velocity >= 100) {
+      snapArmed = true;
     }
 
     lastScroll = currentScroll;
