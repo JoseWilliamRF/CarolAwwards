@@ -40,6 +40,7 @@ export function initScrollEngine() {
   // BLOCO 2 – PARALLAX DA HERO
   // ============================================================
   let heroHeightParallax = window.innerHeight;
+  const heroSec = document.querySelector('.hero') as HTMLElement | null;
   const heroGrid = document.querySelector(
     '.hero__grid-wrapper',
   ) as HTMLElement | null;
@@ -50,6 +51,14 @@ export function initScrollEngine() {
       const progress = -(Math.cos(Math.PI * rawProgress) - 1) / 2;
       const scale = 1 - 0.15 * progress;
       heroGrid.style.transform = `translate(-50%, -50%) rotate(-30deg) scale(${scale})`;
+
+      // Clip-path linear: esconde o Hero de baixo pra cima conforme o scroll.
+      // rawProgress é linear (0→1), sem easing — o corte acompanha o scroll real.
+      // Ref: https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#inset
+      if (heroSec) {
+        const clipPercent = rawProgress * 100;
+        heroSec.style.clipPath = `inset(0 0 ${clipPercent}% 0)`;
+      }
     };
 
     lenis.on('scroll', updateParallax);

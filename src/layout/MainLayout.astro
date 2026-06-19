@@ -64,8 +64,11 @@ const ogImage = settings?.data.og_image?.url;
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <style is:inline>
+      html {
+        background: url('/foto-background.jpg') center/cover fixed no-repeat #080D0B;
+      }
       body { 
-        background-color: var(--color-overlay, #080D0B); 
+        background-color: transparent; 
         margin: 0; 
       }
       
@@ -225,7 +228,7 @@ const ogImage = settings?.data.og_image?.url;
     font-feature-settings: "kern" 1;
     font-kerning: normal;
     letter-spacing: -0.02em;
-    background-color: var(--color-overlay); 
+    background-color: transparent; 
   }
 
   /* 4. Imagens como bloco */
