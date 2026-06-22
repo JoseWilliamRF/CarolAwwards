@@ -222,4 +222,70 @@ export function initScrollEngine() {
   }
 
   requestAnimationFrame(checkSnap);
+
+  // ============================================================
+  // BLOCO 4 – FOOTER REVEAL (sobe com vidro via lenis.on('scroll'))
+  // ============================================================
+  const footerEl = document.querySelector('.footer') as HTMLElement | null;
+  if (footerEl) {
+    const footerInner = footerEl.querySelector('.footer__inner') as HTMLElement;
+    const footerOverlay = footerEl.querySelector(
+      '.footer__bg-overlay',
+    ) as HTMLElement;
+    const footerBottom = footerEl.querySelector(
+      '.footer__bottom',
+    ) as HTMLElement;
+
+    // ═══════════════════════════════════════════════════════
+    // KEYFRAMES DO CLIP-PATH
+    // Cada entrada: [posição no raw (0→1), clip-path % (100→0)]
+    // raw = fração do scroll disponível (0=início, 1=fim da página)
+    // Mexa nos rawValues pra controlar a velocidade de cada trecho
+    // ═══════════════════════════════════════════════════════
+    const clipKeyframes: [number, number][] = [
+      [0, 100], // início: totalmente escondido
+      [0.6, 60], // 60% do scroll → só 30% revelado (bem lento)
+      [0.85, 15], // 85% do scroll → 85% revelado (acelera no fim)
+      [1, 0], // fim: 100% visível (garantido)
+    ];
+
+    function lerpClip(raw: number): number {
+      for (let i = 0; i < clipKeyframes.length - 1; i++) {
+        const [r1, c1] = clipKeyframes[i];
+        const [r2, c2] = clipKeyframes[i + 1];
+        if (raw >= r1 && raw <= r2) {
+          const t = (raw - r1) / (r2 - r1);
+          return c1 + (c2 - c1) * t;
+        }
+      }
+      return 0;
+    }
+
+    const updateFooter = ({ scroll }: { scroll: number }) => {
+      const footerTop = footerEl.offsetTop;
+      const windowHeight = window.innerHeight;
+
+      const startPoint = footerTop - windowHeight + 100;
+      const pageBottom = document.body.scrollHeight - windowHeight;
+      const availableScroll = Math.max(1, pageBottom - startPoint);
+
+      const raw = Math.min(
+        1,
+        Math.max(0, (scroll - startPoint) / availableScroll),
+      );
+      const clip = lerpClip(raw);
+      const progress = 1 - clip / 100; // converte clip→progress pro translateY
+
+      const y = 80 * (1 - progress);
+      const yBot = 30 * (1 - Math.min(1, progress * 1.3));
+
+      footerInner.style.transform = `translateY(${y}px)`;
+      footerInner.style.clipPath = `inset(${clip}% 0 0 0)`;
+      footerOverlay.style.clipPath = `inset(${clip}% 0 0 0)`;
+      footerBottom.style.transform = `translateY(${yBot}px)`;
+      footerBottom.style.clipPath = `inset(${Math.max(0, clip - 10)}% 0 0 0)`;
+    };
+
+    lenis.on('scroll', updateFooter);
+  }
 }
