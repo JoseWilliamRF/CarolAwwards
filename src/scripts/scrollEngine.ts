@@ -14,7 +14,8 @@ export function initScrollEngine() {
       lerp: 0.12, // ← era 0.09 (desacelera mais rápido)
       wheelMultiplier: 1.3,
       smoothWheel: true,
-      smoothTouch: false,
+      smoothTouch: true,
+      touchMultiplier: 0.8,
     },
   });
 
