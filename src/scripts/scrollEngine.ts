@@ -45,16 +45,32 @@ export function initScrollEngine() {
     '.hero__grid-wrapper',
   ) as HTMLElement | null;
 
+  // Mobile: one-way scroll tracker (só avança, nunca volta → sem glitch de inércia)
+  let maxScrollMobile = 0;
+
   if (heroGrid) {
     const updateParallax = ({ scroll }: { scroll: number }) => {
+      // ── MOBILE: reveal one-way (só clip-path, sem scale/rotate) ──
+      if (window.innerWidth <= 768) {
+        // Reseta ao voltar ao topo (ex: clicou "Início")
+        if (scroll < 10) maxScrollMobile = 0;
+
+        // Lê innerHeight a cada frame — barra do Chrome muda o tamanho da tela
+        const mobileHeight = window.innerHeight;
+        maxScrollMobile = Math.max(maxScrollMobile, scroll);
+        const raw = Math.min(1, Math.max(0, maxScrollMobile / mobileHeight));
+        if (heroSec) {
+          heroSec.style.clipPath = `inset(0 0 ${raw * 100}% 0)`;
+        }
+        return;
+      }
+
+      // ── DESKTOP: parallax completo (intocado) ──
       const rawProgress = Math.min(1, Math.max(0, scroll / heroHeightParallax));
       const progress = -(Math.cos(Math.PI * rawProgress) - 1) / 2;
       const scale = 1 - 0.15 * progress;
       heroGrid.style.transform = `translate(-50%, -50%) rotate(-30deg) scale(${scale})`;
 
-      // Clip-path linear: esconde o Hero de baixo pra cima conforme o scroll.
-      // rawProgress é linear (0→1), sem easing — o corte acompanha o scroll real.
-      // Ref: https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#inset
       if (heroSec) {
         const clipPercent = rawProgress * 100;
         heroSec.style.clipPath = `inset(0 0 ${clipPercent}% 0)`;
