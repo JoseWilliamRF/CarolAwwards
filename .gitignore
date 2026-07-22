@@ -29,6 +29,12 @@ prismic-backup/
 # OS & Editors
 .DS_Store
 Thumbs.db
+
+# AI / Copilot
+AGENTS.md
+.copilot/
+
+Thumbs.db
 .idea/
 .vscode/
 *.swp
