@@ -14,8 +14,7 @@ export function initScrollEngine() {
       lerp: 0.12, // ← era 0.09 (desacelera mais rápido)
       wheelMultiplier: 1.3,
       smoothWheel: true,
-      smoothTouch: true,
-      touchMultiplier: 0.8,
+      smoothTouch: false, // ← mobile: scroll nativo do hardware (sem emulação JS)
     },
   });
 
@@ -172,44 +171,8 @@ export function initScrollEngine() {
         });
       }
     }
-    // ====================================================================
-    // DISJUNTOR 2 MOBILE: encaixe suave nas bordas
-    // ====================================================================
-    else if (
-      historiasSec &&
-      window.innerWidth <= 768 &&
-      currentScroll > pacotesSec!.offsetTop &&
-      currentScroll < historiasSec.offsetTop &&
-      velocity < 80
-    ) {
-      if (snapArmed) {
-        const top = pacotesSec!.offsetTop;
-        const bottom = historiasSec.offsetTop;
-        const zone = bottom - top;
-        const edge = zone * 0.25;
-
-        const nearTop = currentScroll - top < edge;
-        const nearBottom = bottom - currentScroll < edge;
-
-        if (nearTop || nearBottom) {
-          snapArmed = false;
-          const direction: 'up' | 'down' = nearTop ? 'up' : 'down';
-          lastDirection = direction;
-          const target = direction === 'up' ? top : bottom;
-          console.log(`%c[CIRCUITO 2📱] Alvo: ${target}px`, 'color: #e67e22;');
-
-          const distance = Math.abs(target - currentScroll);
-          const dynamicDuration = Math.min(
-            Math.max(distance / (smoothVelocity || 1), 0.25),
-            0.6,
-          );
-          lenis.scrollTo(target, {
-            duration: dynamicDuration,
-            easing: frictionEase,
-          });
-        }
-      }
-    }
+    // DISJUNTOR 2 MOBILE: removido — scroll nativo do hardware gerencia o deslize.
+    // Manter snap mobile causava conflito entre lenis.scrollTo e inércia do touch.
     // ====================================================================
     // REARME DO MOTOR APÓS A ZONA DE GRAVIDADE
     // ====================================================================

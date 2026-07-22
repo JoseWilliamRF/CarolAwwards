@@ -313,9 +313,9 @@ const trackMid = [...imagesMid, ...imagesMid, ...imagesMid];
     const hero = document.querySelector('#hero') as HTMLElement;
     const lenis = (window as any).lenisInstance;
     let tracksPaused = false;
+    const heroHeight = hero.offsetHeight; // medido UMA vez (evita layout thrashing no mobile)
 
       lenis.on('scroll', ({ scroll }: { scroll: number }) => {
-        const heroHeight = hero.offsetHeight;
         const tweens = gsap.getTweensOf('.track-left, .track-right');
 
         if (scroll >= heroHeight) {
